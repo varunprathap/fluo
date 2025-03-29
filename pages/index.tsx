@@ -81,7 +81,7 @@ export default function App() {
       <section className="ai-brain">
         <h2>Meet Your AI Brain 🤖</h2>
         <p>
-          Fluo\'s AI agent adapts like water—guiding employees, optimizing rosters, and keeping employers in control. 🚀
+          Fluo&apos;s AI agent adapts like water—guiding employees, optimizing rosters, and keeping employers in control. 🚀
         </p>
       </section>
 
