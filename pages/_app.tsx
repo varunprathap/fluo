@@ -1,4 +1,4 @@
-import "@/styles/app.css";
+import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { Amplify } from "aws-amplify";
 import outputs from "@/amplify_outputs.json";

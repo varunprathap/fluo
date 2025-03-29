@@ -38,6 +38,13 @@
   --callout-border-rgb: 172, 175, 176;
   --card-rgb: 180, 185, 188;
   --card-border-rgb: 131, 134, 135;
+
+  --primary-color: #6C3BFF;
+  --secondary-color: #38BDF8;
+  --accent-color: #7DD3FC;
+  --background-color: #F8F7FF;
+  --text-color: #1A1A1A;
+  --text-secondary: #666666;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -83,25 +90,409 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: var(--text-color);
+  background-color: var(--background-color);
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-a {
-  color: inherit;
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(120deg, rgba(108, 59, 255, 0.08) 0%, rgba(108, 59, 255, 0.02) 50%, rgba(108, 59, 255, 0) 100%),
+    linear-gradient(240deg, rgba(108, 59, 255, 0.08) 0%, rgba(108, 59, 255, 0.02) 50%, rgba(108, 59, 255, 0) 100%);
+  background-size: 200% 200%;
+  animation: gentleFlow 15s ease infinite;
+  z-index: -1;
+  opacity: 1;
+}
+
+@keyframes gentleFlow {
+  0% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+  100% {
+    background-position: 0% center;
+  }
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+  padding: 120px 20px;
+  position: relative;
+  background: transparent;
+}
+
+.hero::after {
+  display: none;
+}
+
+.hero h1 {
+  font-size: 84px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  letter-spacing: -2px;
+  color: var(--text-color);
+  text-shadow: none;
+}
+
+.hero p {
+  font-size: 22px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+  letter-spacing: -0.5px;
+}
+
+/* Buttons */
+.button {
+  display: inline-block;
+  padding: 16px 36px;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 18px;
   text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  letter-spacing: -0.5px;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+.button-primary {
+  background: linear-gradient(135deg, var(--primary-color), #9747FF);
+  color: white;
+  box-shadow: 0 4px 20px rgba(108, 59, 255, 0.25);
+}
+
+.button-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(108, 59, 255, 0.35);
+}
+
+.button-secondary {
+  background-color: #E5E5E5;
+  color: var(--text-color);
+}
+
+.button-secondary:hover {
+  background-color: #D1D1D1;
+  transform: translateY(-2px);
+}
+
+/* Features Section */
+.features {
+  padding: 100px 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  background: transparent;
+}
+
+.feature {
+  text-align: center;
+}
+
+.feature h3 {
+  font-size: 28px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.feature p {
+  font-size: 18px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* AI Brain Section */
+.ai-brain {
+  padding: 100px 20px;
+  text-align: center;
+  position: relative;
+  background: transparent;
+}
+
+.ai-brain::before {
+  display: none;
+}
+
+.ai-brain h2 {
+  font-size: 56px;
+  margin-bottom: 24px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  color: var(--text-color);
+}
+
+.ai-brain p {
+  font-size: 20px;
+  color: var(--text-secondary);
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.6;
+  letter-spacing: -0.5px;
+}
+
+/* CTA Section */
+.cta {
+  padding: 100px 20px;
+  text-align: center;
+  position: relative;
+  background: transparent;
+}
+
+.cta::before {
+  display: none;
+}
+
+.cta h2 {
+  font-size: 56px;
+  margin-bottom: 24px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  color: var(--text-color);
+}
+
+.cta p {
+  font-size: 20px;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  letter-spacing: -0.5px;
+  line-height: 1.6;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Footer */
+footer {
+  padding: 40px 20px;
+  text-align: center;
+  position: relative;
+  background: transparent;
+}
+
+footer p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  letter-spacing: -0.2px;
+}
+
+/* Responsive Design */
+/* Extra large screens (1440px and up) */
+@media (min-width: 1440px) {
+  .container, .features {
+    max-width: 1320px;
+  }
+
+  .hero h1 {
+    font-size: 96px;
+  }
+
+  .hero p {
+    font-size: 24px;
+    max-width: 800px;
+  }
+}
+
+/* Large screens (1024px to 1439px) */
+@media (max-width: 1439px) {
+  .container, .features {
+    max-width: 1140px;
+  }
+}
+
+/* Medium screens (tablets, 768px to 1023px) */
+@media (max-width: 1023px) {
+  .container, .features {
+    max-width: 720px;
+  }
+
+  .hero {
+    padding: 80px 20px;
+  }
+
+  .hero h1 {
+    font-size: 72px;
+  }
+
+  .hero p {
+    font-size: 20px;
+    max-width: 500px;
+  }
+
+  .features {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    padding: 80px 20px;
+  }
+
+  .ai-brain,
+  .cta {
+    padding: 80px 20px;
+  }
+
+  .ai-brain h2,
+  .cta h2 {
+    font-size: 48px;
+  }
+
+  .ai-brain p,
+  .cta p {
+    font-size: 18px;
+    max-width: 600px;
+  }
+}
+
+/* Small screens (mobile, up to 767px) */
+@media (max-width: 767px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .hero {
+    padding: 60px 16px;
+  }
+
+  .hero h1 {
+    font-size: 48px;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  .hero p {
+    font-size: 18px;
+    max-width: 100%;
+    padding: 0 16px;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 60px 16px;
+  }
+
+  .feature h3 {
+    font-size: 24px;
+  }
+
+  .feature p {
+    font-size: 16px;
+  }
+
+  .ai-brain,
+  .cta {
+    padding: 60px 16px;
+  }
+
+  .ai-brain h2,
+  .cta h2 {
+    font-size: 36px;
+    letter-spacing: -1px;
+  }
+
+  .ai-brain p,
+  .cta p {
+    font-size: 16px;
+    max-width: 100%;
+  }
+
+  .button {
+    width: 100%;
+    max-width: 300px;
+    padding: 14px 28px;
+    font-size: 16px;
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  footer {
+    padding: 32px 16px;
+  }
+
+  footer p {
+    font-size: 14px;
+  }
+}
+
+/* Extra small screens (320px to 374px) */
+@media (max-width: 374px) {
+  .hero h1 {
+    font-size: 40px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  .ai-brain h2,
+  .cta h2 {
+    font-size: 32px;
+  }
+
+  .button {
+    padding: 12px 24px;
+    font-size: 15px;
+  }
+
+  footer {
+    padding: 24px 16px;
+  }
+
+  footer p {
+    font-size: 13px;
+  }
+}
+
+/* Fix for larger phones in landscape */
+@media (max-height: 600px) and (orientation: landscape) {
+  .hero {
+    padding: 40px 16px;
+  }
+
+  .hero h1 {
+    font-size: 42px;
+    margin-bottom: 12px;
+  }
+
+  .features,
+  .ai-brain,
+  .cta {
+    padding: 40px 16px;
+  }
+
+  footer {
+    padding: 20px 16px;
   }
 }
