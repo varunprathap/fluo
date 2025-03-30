@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Button,
   Flex,
@@ -24,6 +23,12 @@ export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { tokens } = useTheme();
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    // Focus the input field when component mounts
+    inputRef.current?.focus();
+  }, []);
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
@@ -65,7 +70,13 @@ export default function ChatInterface() {
         <Card>
           <Flex direction="column" height="90vh">
             {/* Chat Messages */}
-            <ScrollView flex="1" padding={tokens.space.medium}>
+            <ScrollView 
+              flex="1" 
+              padding={tokens.space.medium}
+              width="90%"
+              maxWidth="800px"
+              margin="0 auto"
+            >
               <Flex direction="column" gap={tokens.space.medium}>
                 {messages.map((msg) => (
                   <Card
@@ -101,6 +112,17 @@ export default function ChatInterface() {
               direction="row"
               gap={tokens.space.small}
               padding={tokens.space.medium}
+              position="fixed"
+              bottom="10px"
+              left="50%"
+              transform="translateX(-50%)"
+              width="90%"
+              maxWidth="800px"
+              backgroundColor="white"
+              borderRadius="50px"
+              boxShadow="0 2px 20px rgba(0, 0, 0, 0.1)"
+              className="chat-input"
+              alignItems="center"
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSendMessage();
@@ -116,12 +138,25 @@ export default function ChatInterface() {
                 rows={1}
                 autoResize={true}
                 hasError={false}
+                style={{ margin: '0', caretColor: 'currentColor' }}
+                ref={inputRef}
+                autoFocus
+                onFocus={() => inputRef.current?.focus()}
               />
               <Button
                 variation="primary"
                 isLoading={isLoading}
                 onClick={handleSendMessage}
                 ariaLabel="Send message"
+                borderRadius="50%"
+                padding={tokens.space.small}
+                height="40px"
+                width="40px"
+                minWidth="40px"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                alignSelf="center"
               >
                 <Send size={20} />
               </Button>

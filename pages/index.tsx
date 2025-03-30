@@ -100,11 +100,11 @@ export default function App() {
         <h2 className="flex items-center justify-center gap-2">Meet Your AI Brain <Bot className="h-12 w-12 text-[#6C3BFF]" /></h2>
         <p>
           Powered by advanced AI, Fluo learns your preferences and adapts to your
-          workflow, making task management more intuitive than ever before. 🚀
+          workflow, making shift management more intuitive than ever before. 🚀
         </p>
         <div className="ai-brain-top-padding">
           <Link href="/how-it-works" className="button button-secondary">
-          <span className="flex items-center gap-2">
+          <span className="flex items-center justify-center gap-2">
             Learn More 
           </span>
           </Link>
@@ -120,7 +120,7 @@ export default function App() {
         </p>
         <div className="cta-buttons">
           <Link href="mailto:varun@vibing.com.au" className="button button-primary">
-            <span className="flex items-center gap-2">
+            <span className="flex items-center justify-center gap-2">
               Join the Flow 
             </span>
           </Link>

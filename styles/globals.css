@@ -142,7 +142,7 @@ body::before {
 /* Hero Section */
 .hero {
   text-align: center;
-  padding: 120px 20px;
+  padding: 80px 20px;
   position: relative;
   background: transparent;
 }
@@ -213,8 +213,9 @@ body::before {
 }
 /* Features Section */
 .features {
-  padding: 100px 20px;
+  padding: 80px 20px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
   gap: 48px;
@@ -222,6 +223,12 @@ body::before {
   margin: 0 auto;
   position: relative;
   background: transparent;
+}
+
+@media (min-width: 768px) {
+  .features {
+    flex-direction: row;
+  }
 }
 
 .feature {
@@ -243,7 +250,7 @@ body::before {
 
 /* AI Brain Section */
 .ai-brain {
-  /* padding: 100px 20px; */
+  padding: 80px 20px;
   text-align: center;
   position: relative;
   background: transparent;
@@ -272,7 +279,7 @@ body::before {
 
 /* CTA Section */
 .cta {
-  padding: 100px 20px;
+  padding: 80px 20px;
   text-align: center;
   position: relative;
   background: transparent;
@@ -348,8 +355,11 @@ footer p {
     max-width: 720px;
   }
 
-  .hero {
-    padding: 80px 20px;
+  .hero,
+  .features,
+  .ai-brain,
+  .cta {
+    padding: 60px 20px;
   }
 
   .hero h1 {
@@ -364,12 +374,6 @@ footer p {
   .features {
     grid-template-columns: repeat(2, 1fr);
     gap: 32px;
-    padding: 80px 20px;
-  }
-
-  .ai-brain,
-  .cta {
-    padding: 80px 20px;
   }
 
   .ai-brain h2,
@@ -390,8 +394,11 @@ footer p {
     padding: 0 16px;
   }
 
-  .hero {
-    padding: 60px 16px;
+  .hero,
+  .features,
+  .ai-brain,
+  .cta {
+    padding: 40px 16px;
   }
 
   .hero h1 {
@@ -409,7 +416,6 @@ footer p {
   .features {
     grid-template-columns: 1fr;
     gap: 40px;
-    padding: 60px 16px;
   }
 
   .feature h3 {
@@ -418,11 +424,6 @@ footer p {
 
   .feature p {
     font-size: 16px;
-  }
-
-  .ai-brain,
-  .cta {
-    padding: 60px 16px;
   }
 
   .ai-brain h2,
@@ -490,8 +491,11 @@ footer p {
 
 /* Fix for larger phones in landscape */
 @media (max-height: 600px) and (orientation: landscape) {
-  .hero {
-    padding: 40px 16px;
+  .hero,
+  .features,
+  .ai-brain,
+  .cta {
+    padding: 30px 16px;
   }
 
   .hero h1 {
@@ -512,5 +516,52 @@ footer p {
 
 .ai-brain-top-padding {
   padding-top: 25px;
+}
+
+.chat-input .amplify-textarea {
+  border: none;
+  outline: none;
+  box-shadow: none;
+  padding: 12px;
+  background-color: transparent;
+  color: var(--text-color);
+}
+
+.chat-input .amplify-textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.chat-input .amplify-textarea:focus {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.chat-input .amplify-textarea {
+  caret-color: var(--text-color);
+}
+
+@keyframes blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.chat-input .amplify-textarea {
+  caret-color: transparent;
+}
+
+.chat-input .amplify-textarea::selection {
+  background-color: rgba(108, 59, 255, 0.2);
+}
+
+.chat-input .amplify-textarea:focus {
+  caret-color: var(--text-color);
+}
+
+.chat-input .amplify-textarea:focus::after {
+  content: '';
+  position: absolute;
+  animation: blink 1s step-end infinite;
 }
 
