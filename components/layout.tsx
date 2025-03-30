@@ -1,20 +1,23 @@
 import { Space_Grotesk } from "next/font/google";
 import Link from "next/link";
 import { Zap, Info } from "lucide-react";
+import { Flex } from "@aws-amplify/ui-react";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"] });
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${spaceGrotesk.className} min-h-screen bg-[#F8F7FF]`}>
-      {/* Navigation */}
-      <div className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="container mx-auto px-4 py-4">
-         
-        </div>
-      </div>
-
-      {/* Page Content */}
+    <div className={`${spaceGrotesk.className} flex flex-col min-h-screen bg-white`}>
+          <div className="flex flex-row min-h-[3vh] justify-center p-[10px] pt-[25px] mt-[10px] border border-gray-200 w-[70vw] mx-auto rounded-[20px]">
+            <Flex className="items-center space-x-[50px] border border-gray-300 rounded-lg p-4 w-fit">
+              <Link href="/" className="text-lg font-medium hover:text-purple-600 transition-colors">
+                Home
+              </Link>
+              <Link href="/how-it-works" className="text-lg font-medium hover:text-purple-600 transition-colors">
+                How it Works
+              </Link>
+            </Flex>
+          </div>
       <main>{children}</main>
     </div>
   );

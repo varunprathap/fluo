@@ -85,23 +85,32 @@ export default function App() {
           </p>
         </div>
         <div className="feature">
-          <CheckCircle2 className="h-8 w-8 text-[#6C3BFF] mb-4" />
+         
+         <CheckCircle2 className="h-8 w-8 text-[#6C3BFF] mb-4 justify-center" />
           <h3>Built-In Compliance</h3>
           <p>
             Stay ahead with effortless regulation tracking.
           </p>
+         
         </div>
       </section>
 
       {/* AI Agent Section */}
       <section className="ai-brain">
-        <h2 className="flex items-center justify-center gap-4">
-          Meet Your AI Brain
-        </h2>
-        <p className="flex items-center justify-center gap-2">
-          Fluo&apos;s AI agent adapts like water—guiding employees, optimizing rosters, and keeping employers in control.
+        <h2 className="flex items-center justify-center gap-2">Meet Your AI Brain <Bot className="h-12 w-12 text-[#6C3BFF]" /></h2>
+        <p>
+          Powered by advanced AI, Fluo learns your preferences and adapts to your
+          workflow, making task management more intuitive than ever before. 🚀
         </p>
+        <div className="ai-brain-top-padding">
+          <Link href="/how-it-works" className="button button-secondary">
+          <span className="flex items-center gap-2">
+            Learn More 
+          </span>
+          </Link>
+        </div>
       </section>
+
 
       {/* CTA Section */}
       <section id="get-started" className="cta">
@@ -110,9 +119,9 @@ export default function App() {
           Simplify work for everyone. Join the waitlist today.
         </p>
         <div className="cta-buttons">
-          <Link href="mailto:waitlist@fluo.app" className="button button-primary">
+          <Link href="mailto:varun@vibing.com.au" className="button button-primary">
             <span className="flex items-center gap-2">
-              Join the Flow <ArrowRight className="h-5 w-5" />
+              Join the Flow 
             </span>
           </Link>
           
