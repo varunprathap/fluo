@@ -1,6 +1,6 @@
 import { Space_Grotesk } from "next/font/google";
 import Link from "next/link";
-import { Zap, Info } from "lucide-react";
+import { Zap, Info, Home, MessageCircle, LogIn } from "lucide-react";
 import { Flex } from "@aws-amplify/ui-react";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"] });
@@ -10,14 +10,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className={`${spaceGrotesk.className} flex flex-col min-h-screen bg-white`}>
           <div className="flex flex-row min-h-[3vh] justify-center p-[10px] mt-[10px] border border-gray-200 w-[70vw] mx-auto rounded-[20px]">
             <Flex className="items-center space-x-[50px] border border-gray-300 rounded-lg p-4 w-fit">
-              <Link href="/" className="text-lg font-medium hover:text-purple-600 transition-colors">
-                Home
+              <Link href="/" className="flex items-center gap-2 text-lg font-medium hover:text-purple-600 transition-colors group">
+                <Home className="w-5 h-5" />
+                <span className="hidden md:inline">Home</span>
+      
               </Link>
-              <Link href="/how-it-works" className="text-lg font-medium hover:text-purple-600 transition-colors">
-                How it Works
+              <Link href="/how-it-works" className="flex items-center gap-2 text-lg font-medium hover:text-purple-600 transition-colors group">
+                <MessageCircle className="w-5 h-5" />
+                <span className="hidden md:inline">How it Works</span>
+ 
               </Link>
-              <Link href="/login" className="text-lg font-medium hover:text-purple-600 transition-colors">
-                Join the flou
+              <Link href="/login" className="flex items-center gap-2 text-lg font-medium hover:text-purple-600 transition-colors group">
+                <LogIn className="w-5 h-5" />
+                <span className="hidden md:inline">Join the flou</span>
+
               </Link>
             </Flex>
           </div>
