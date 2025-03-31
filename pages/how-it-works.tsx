@@ -10,13 +10,10 @@ import {
   Text,
 } from "@aws-amplify/ui-react";
 import { Send } from "lucide-react";
+import { AIConversation, ConversationMessage, ConversationMessageContent, SendMesageParameters } from '@aws-amplify/ui-react-ai';
+import ReactMarkdown from 'react-markdown';
 
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-}
+type Message = ConversationMessage;
 
 export default function ChatInterface() {
   const [message, setMessage] = useState("");
@@ -30,19 +27,19 @@ export default function ChatInterface() {
     inputRef.current?.focus();
   }, []);
 
-  const handleSendMessage = async () => {
-    if (!message.trim()) return;
+  const handleSendMessage = async (input: SendMesageParameters) => {
+    if (!input.content?.[0]?.text?.trim()) return;
 
     // Add user message to chat
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: message,
-      sender: 'user',
-      timestamp: new Date()
+      content: input.content,
+      role: 'user',
+      createdAt: new Date().toISOString(),
+      conversationId: '1'
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setMessage("");
     setIsLoading(true);
 
     try {
@@ -51,9 +48,10 @@ export default function ChatInterface() {
       setTimeout(() => {
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
-          text: "Thanks for your message! This is a placeholder response.",
-          sender: 'ai',
-          timestamp: new Date()
+          content: [{ text: "Thanks for your message! This is a placeholder response." }],
+          role: 'assistant',
+          createdAt: new Date().toISOString(),
+          conversationId: '1'
         };
         setMessages(prev => [...prev, aiMessage]);
         setIsLoading(false);
@@ -67,102 +65,26 @@ export default function ChatInterface() {
   return (
 
       <View padding={tokens.space.large}>
-        <Card>
-          <Flex direction="column" height="90vh">
-            {/* Chat Messages */}
-            <ScrollView 
-              flex="1" 
-              padding={tokens.space.medium}
-              width="90%"
-              maxWidth="800px"
-              margin="0 auto"
-            >
-              <Flex direction="column" gap={tokens.space.medium}>
-                {messages.map((msg) => (
-                  <Card
-                    key={msg.id}
-                    variation="elevated"
-                    backgroundColor={msg.sender === 'user' ? tokens.colors.purple[10] : tokens.colors.neutral[20]}
-                    marginLeft={msg.sender === 'user' ? 'auto' : '0'}
-                    marginRight={msg.sender === 'ai' ? 'auto' : '0'}
-                    maxWidth="70%"
-                  >
-                    <Text variation="primary">{msg.text}</Text>
-                    <Text
-                      variation="tertiary"
-                      fontSize={tokens.fontSizes.xs}
-                    >
-                      {msg.timestamp.toLocaleTimeString()}
-                    </Text>
-                  </Card>
-                ))}
-                {isLoading && (
-                  <Card variation="elevated" backgroundColor={tokens.colors.neutral[20]}>
-                    <Flex alignItems="center" gap={tokens.space.small}>
-                      <Text variation="primary">AI is typing...</Text>
-                    </Flex>
-                  </Card>
-                )}
-              </Flex>
-            </ScrollView>
 
-            {/* Message Input */}
-            <Flex
-              as="form"
-              direction="row"
-              gap={tokens.space.small}
-              padding={tokens.space.medium}
-              position="fixed"
-              bottom="10px"
-              left="50%"
-              transform="translateX(-50%)"
-              width="90%"
-              maxWidth="800px"
-              backgroundColor="white"
-              borderRadius="50px"
-              boxShadow="0 2px 20px rgba(0, 0, 0, 0.1)"
-              className="chat-input"
-              alignItems="center"
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSendMessage();
-              }}
-            >
-              <TextAreaField
-                flex="1"
-                label="Message"
-                labelHidden={true}
-                value={message}
-                placeholder="Type your message..."
-                onChange={(e) => setMessage(e.target.value)}
-                rows={1}
-                autoResize={true}
-                hasError={false}
-                style={{ margin: '0', caretColor: 'currentColor' }}
-                ref={inputRef}
-                autoFocus
-                onFocus={() => inputRef.current?.focus()}
-              />
-              <Button
-                variation="primary"
-                isLoading={isLoading}
-                onClick={handleSendMessage}
-                ariaLabel="Send message"
-                borderRadius="50%"
-                padding={tokens.space.small}
-                height="40px"
-                width="40px"
-                minWidth="40px"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                alignSelf="center"
-              >
-                <Send size={20} />
-              </Button>
-            </Flex>
-          </Flex>
-        </Card>
+
+      <AIConversation
+        welcomeMessage={
+          <Card>
+            <Text>I am your virtual assistant, ask me any questions you like!</Text>
+          </Card>
+        }
+        messageRenderer={{
+          text: ({ text }) => <ReactMarkdown>{text}</ReactMarkdown>
+        }}
+        messages={messages}
+        handleSendMessage={handleSendMessage}
+        FallbackResponseComponent={(props) => (
+          <Card variation="outlined">{JSON.stringify(props, null, 2)}</Card>
+        )}
+      />
+
+
+        
       </View>
    
   );
