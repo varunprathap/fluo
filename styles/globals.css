@@ -631,8 +631,7 @@ footer p {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
-  margin-bottom: 100px !important; /* Space for the input form */
-  height: calc(100% - 100px) !important; /* Ensure it doesn't overlap with the form */
+  margin-bottom: 8vh !important; 
   font-size: 14px;
 }
 
@@ -649,6 +648,7 @@ footer p {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 5;
   font-size: 14px;
+  height: 8vh !important;
 }
 
 .amplify-ai-conversation__message {
