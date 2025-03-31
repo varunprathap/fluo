@@ -54,15 +54,55 @@ export default function ChatInterface() {
     };
     setMessages(prev => [...prev, userMessage]);
 
-    // Add AI response immediately
-    const aiMessage: Message = {
+    // Show thinking state
+    setIsThinking(true);
+    const thinkingMessage: Message = {
       id: (Date.now() + 1).toString(),
-      content: [{ text: responseMap[userMessageText] || "I'm not sure about that. Could you please rephrase?" }],
+      content: [{ text: "Thinking..." }],
       role: 'assistant',
       createdAt: new Date().toISOString(),
       conversationId: '1'
     };
-    setMessages(prev => [...prev, aiMessage]);
+    setMessages(prev => [...prev, thinkingMessage]);
+
+    // Simulate AI processing with a delay
+    setTimeout(() => {
+      // Check if the message exists in responseMap
+      if (responseMap[userMessageText]) {
+        // Replace thinking message with actual response
+        const aiMessage: Message = {
+          id: (Date.now() + 2).toString(),
+          content: [{ text: responseMap[userMessageText] }],
+          role: 'assistant',
+          createdAt: new Date().toISOString(),
+          conversationId: '1'
+        };
+        setMessages(prev => {
+          // Remove the "Thinking..." message and add the real response
+          const updatedMessages = prev.filter(msg => msg.content[0].text !== "Thinking...");
+          return [...updatedMessages, aiMessage];
+        });
+      } else {
+        // Replace thinking message with suggestions card
+        const suggestionsCard: Message = {
+          id: (Date.now() + 2).toString(),
+          content: [{
+            text: `Please choose from the suggestions below:\n\n${suggestions.map((suggestion, index) => 
+              `${index + 1}. ${suggestion}`
+            ).join('\n')}`
+          }],
+          role: 'assistant',
+          createdAt: new Date().toISOString(),
+          conversationId: '1'
+        };
+        setMessages(prev => {
+          // Remove the "Thinking..." message and add the suggestions card
+          const updatedMessages = prev.filter(msg => msg.content[0].text !== "Thinking...");
+          return [...updatedMessages, suggestionsCard];
+        });
+      }
+      setIsThinking(false);
+    }, 1000); // 1-second delay to simulate thinking
   };
 
   // Handler for suggestion clicks with loading state
@@ -77,7 +117,7 @@ export default function ChatInterface() {
     };
     setMessages(prev => [...prev, userMessage]);
 
-    // Show loading indicator
+    // Show thinking state
     setIsThinking(true);
     const thinkingMessage: Message = {
       id: (Date.now() + 1).toString(),
@@ -131,7 +171,7 @@ export default function ChatInterface() {
             fontWeight="medium"
             border="none"
             boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
-            isDisabled={isThinking} // Disable buttons while thinking
+            isDisabled={isThinking}
           >
             {suggestion}
           </Button>
@@ -150,7 +190,8 @@ export default function ChatInterface() {
             boxShadow="0 4px 10px rgba(0, 0, 0, 0.08)"
           >
             <Flex direction="column" gap={tokens.space.medium}>
-              <Text fontSize="18px" color={tokens.colors.font.secondary}>
+       
+              <Text color={tokens.colors.font.secondary}>
                 Try one of the suggestions above to get started!
               </Text>
             </Flex>
@@ -158,6 +199,41 @@ export default function ChatInterface() {
         }
         messageRenderer={{
           text: ({ text }: { text: string }): JSX.Element => {
+            // Check if the message contains suggestions
+            if (text.includes('Please choose from the suggestions below:')) {
+              return (
+                <Card
+                  variation="elevated"
+                  padding={tokens.space.medium}
+                  backgroundColor={tokens.colors.background.secondary}
+                  borderRadius="12px"
+                  boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
+                >
+                  <Flex direction="column" gap={tokens.space.medium}>
+                    <Text fontSize="16px" color={tokens.colors.font.primary}>
+                      Please choose from the suggestions below:
+                    </Text>
+                    {suggestions.map((suggestion, index) => (
+                      <Button
+                        key={index}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        backgroundColor={tokens.colors.neutral[20]}
+                        color={tokens.colors.font.primary}
+                        borderRadius="8px"
+                        padding="8px 16px"
+                        fontSize="14px"
+                        fontWeight="medium"
+                        border="none"
+                        boxShadow="0 1px 2px rgba(0, 0, 0, 0.1)"
+                        isDisabled={isThinking}
+                      >
+                        {suggestion}
+                      </Button>
+                    ))}
+                  </Flex>
+                </Card>
+              );
+            }
             return <ReactMarkdown>{text}</ReactMarkdown>;
           }
         }}
