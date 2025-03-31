@@ -629,8 +629,8 @@ footer p {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
-  margin-bottom: 80px; /* Space for the input form */
-  height: calc(100% - 80px); /* Ensure it doesn't overlap with the form */
+  margin-bottom: 100px !important; /* Space for the input form */
+  height: calc(100% - 100px) !important; /* Ensure it doesn't overlap with the form */
 }
 
 .amplify-ai-conversation__form {
@@ -714,5 +714,4 @@ footer p {
 .thinking-dot:nth-child(3) {
   animation-delay: 0.4s;
 }
-
 

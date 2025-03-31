@@ -3,8 +3,6 @@ import {
   Button,
   Flex,
   Card,
-  ScrollView,
-  TextAreaField,
   View,
   useTheme,
   Text,
