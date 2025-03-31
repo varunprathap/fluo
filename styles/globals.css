@@ -564,6 +564,7 @@ footer p {
   overflow: hidden !important;
   margin: 0 !important;
   padding: 0 !important;
+  font-size: 14px;
 }
 
 .amplify-ai-conversation__messages {
@@ -593,6 +594,7 @@ footer p {
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1) !important;
   z-index: 1000 !important;
   margin: 0 !important;
+  font-size: 14px;
 }
 
 .chat-container {
@@ -631,6 +633,7 @@ footer p {
   padding: 20px;
   margin-bottom: 100px !important; /* Space for the input form */
   height: calc(100% - 100px) !important; /* Ensure it doesn't overlap with the form */
+  font-size: 14px;
 }
 
 .amplify-ai-conversation__form {
@@ -645,6 +648,7 @@ footer p {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 5;
+  font-size: 14px;
 }
 
 .amplify-ai-conversation__message {
@@ -652,6 +656,7 @@ footer p {
   padding: 12px;
   border-radius: 8px;
   background-color: #f8f9fa;
+  font-size: 14px;
 }
 
 .amplify-ai-conversation__message--user {
@@ -675,11 +680,13 @@ footer p {
   opacity: 0.7;
   background-color: #f5f5f5;
   cursor: not-allowed;
+  font-size: 14px;
 }
 
 .amplify-textarea::placeholder {
   color: #999;
   content: "Disabled for demo";
+  font-size: 14px;
 }
 
 .suggestions-box {
@@ -692,6 +699,11 @@ footer p {
   margin: 20px auto;
   width: 100%;
   max-width: 800px;
+  font-size: 14px;
+}
+
+.suggestions-box button {
+  font-size: 14px;
 }
 
 @keyframes thinking {
