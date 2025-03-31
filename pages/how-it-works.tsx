@@ -21,7 +21,7 @@ export default function ChatInterface() {
 
   // Response mappings for AI replies
   const responseMap: { [key: string]: string } = {
-    "How many casuals are working today?": "You have 3 casuals working today. Do you want to know details?",
+    "How many casuals are working today?": "You have 3 casuals working today.",
     "Estimate total payment for today": "The total estimated salary for today will be $540 for the 3 casuals",
     "Show me shift details": "All 3 casuals are working for the morning shift from 09:00am to 02:30pm with a 30mins lunch break in between"
   };
@@ -85,7 +85,7 @@ export default function ChatInterface() {
         const suggestionsCard: Message = {
           id: (Date.now() + 2).toString(),
           content: [{
-            text: `Please choose from the suggestions below:\n\n${suggestions.map((suggestion, index) => 
+            text: `Please choose from the suggestions below:\n\n${suggestions.map((suggestion, index) =>
               `${index + 1}. ${suggestion}`
             ).join('\n')}`
           }],
@@ -148,33 +148,7 @@ export default function ChatInterface() {
   return (
     <View className="chat-container">
       {/* Suggestions Box */}
-      <Flex
-        direction="row"
-        gap={tokens.space.medium}
-        padding={tokens.space.medium}
-        justifyContent="center"
-        backgroundColor={tokens.colors.background.secondary}
-        borderRadius="8px"
-        marginBottom={tokens.space.medium}
-      >
-        {suggestions.map((suggestion, index) => (
-          <Button
-            key={index}
-            onClick={() => handleSuggestionClick(suggestion)}
-            backgroundColor={tokens.colors.neutral[20]}
-            color={tokens.colors.font.primary}
-            borderRadius="12px"
-            padding="8px 16px"
-            fontSize="14px"
-            fontWeight="medium"
-            border="none"
-            boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
-            isDisabled={isThinking}
-          >
-            {suggestion}
-          </Button>
-        ))}
-      </Flex>
+
 
       {/* AI Conversation */}
       <AIConversation
@@ -188,7 +162,7 @@ export default function ChatInterface() {
             boxShadow="0 4px 10px rgba(0, 0, 0, 0.08)"
           >
             <Flex direction="column" gap={tokens.space.medium}>
-       
+
               <Text color={tokens.colors.font.secondary}>
                 Try one of the suggestions above to get started!
               </Text>
@@ -237,6 +211,34 @@ export default function ChatInterface() {
         }}
         handleSendMessage={handleSendMessage}
       />
+
+      <Flex
+        direction="row"
+        gap={tokens.space.medium}
+        padding={tokens.space.medium}
+        justifyContent="center"
+        backgroundColor={tokens.colors.background.secondary}
+        borderRadius="8px"
+        marginBottom={tokens.space.medium}
+      >
+        {suggestions.map((suggestion, index) => (
+          <Button
+            key={index}
+            onClick={() => handleSuggestionClick(suggestion)}
+            backgroundColor={tokens.colors.neutral[20]}
+            color={tokens.colors.font.primary}
+            borderRadius="12px"
+            padding="8px 16px"
+            fontSize="14px"
+            fontWeight="medium"
+            border="none"
+            boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
+            isDisabled={isThinking}
+          >
+            {suggestion}
+          </Button>
+        ))}
+      </Flex>
     </View>
   );
 }

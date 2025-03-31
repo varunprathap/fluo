@@ -105,7 +105,7 @@ export default function App() {
         <div className="ai-brain-top-padding">
           <Link href="/how-it-works" className="button button-secondary">
           <span className="flex items-center justify-center gap-2">
-            Learn More 
+            How it Works
           </span>
           </Link>
         </div>
