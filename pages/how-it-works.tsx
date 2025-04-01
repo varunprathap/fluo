@@ -7,7 +7,6 @@ import {
   useTheme,
   Text,
 } from "@aws-amplify/ui-react";
-import { Send, Sparkles } from "lucide-react";
 import { AIConversation, ConversationMessage, SendMesageParameters } from '@aws-amplify/ui-react-ai';
 import ReactMarkdown from 'react-markdown';
 
@@ -15,25 +14,65 @@ type Message = ConversationMessage;
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isThinking, setIsThinking] = useState(false); // New loading state
+  const [isThinking, setIsThinking] = useState(false);
+  const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
   const { tokens } = useTheme();
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Response mappings for AI replies
-  const responseMap: { [key: string]: string } = {
-    "How many casuals are working today?": "You have 3 casuals working today.",
-    "Estimate total payment for today": "The total estimated salary for today will be $540 for the 3 casuals",
-    "Show me shift details": "All 3 casuals are working for the morning shift from 09:00am to 02:30pm with a 30mins lunch break in between"
+  // Conversation flow with responses and next suggestions
+  const conversationFlow: { 
+    [key: string]: { 
+      response: string; 
+      suggestions: string[] 
+    } 
+  } = {
+    "How many employees do I have?": {
+      response: "You have 8 employees.",
+      suggestions: ["How many casual employees?", "How many of them are working today?"]
+    },
+    "How many casual employees?": {
+      response: "Out of 8 employees, you have 3 casuals.",
+      suggestions: ["How many of them are working today?", "How many casuals are working this week?"]
+    },
+    "How many of them are working today?": {
+      response: "You have 3 casuals working today.",
+      suggestions: ["What are their shift details?", "What's the total payment for today?"]
+    },
+    "What are their shift details?": {
+      response: "All 3 casuals are working the morning shift from 09:00am to 02:30pm with a 30mins lunch break.",
+      suggestions: ["What's the total payment for today?", "Who is managing them?"]
+    },
+    "What's the total payment for today?": {
+      response: "The total estimated payment for today is $540 for the 3 casuals.",
+      suggestions: ["What about permanent employees?", "What's the weekly total?"]
+    },
+    "What about permanent employees?": {
+      response: "You have 5 permanent employees, none scheduled for today.",
+      suggestions: ["What's their weekly schedule?", "What's the monthly payroll?"]
+    },
+    "What's their weekly schedule?": {
+      response: "Permanent employees work Monday-Friday, 9am-5pm.",
+      suggestions: ["What's the monthly payroll?", "Any overtime this week?"]
+    },
+    "What's the monthly payroll?": {
+      response: "The monthly payroll for all employees is approximately $12,000.",
+      suggestions: ["Any overtime this week?", "What's the annual cost?"]
+    },
+    "Any overtime this week?": {
+      response: "No overtime recorded this week for any employees.",
+      suggestions: ["What's the annual cost?", "What's the leave balance?"]
+    },
+    "What's the annual cost?": {
+      response: "The annual employment cost is approximately $144,000.",
+      suggestions: ["What's the leave balance?", "How many employees do I have?"] // Loop back
+    }
   };
 
-  // Suggestions to display 
-  const suggestions = [
-    "How many casuals are working today?",
-    "Estimate total payment for today",
-    "Show me shift details"
-  ];
+  // Initial suggestions
+  const initialSuggestions = ["How many employees do I have?", "How many casual employees?"];
 
   useEffect(() => {
+    setCurrentSuggestions(initialSuggestions);
     inputRef.current?.focus();
   }, []);
 
@@ -41,8 +80,6 @@ export default function ChatInterface() {
     if (!input.content?.[0]?.text?.trim()) return;
 
     const userMessageText = input.content[0].text.trim();
-
-    // Add user message immediately
     const userMessage: Message = {
       id: Date.now().toString(),
       content: input.content,
@@ -52,7 +89,6 @@ export default function ChatInterface() {
     };
     setMessages(prev => [...prev, userMessage]);
 
-    // Show thinking state
     setIsThinking(true);
     const thinkingMessage: Message = {
       id: (Date.now() + 1).toString(),
@@ -63,49 +99,44 @@ export default function ChatInterface() {
     };
     setMessages(prev => [...prev, thinkingMessage]);
 
-    // Simulate AI processing with a delay
     setTimeout(() => {
-      // Check if the message exists in responseMap
-      if (responseMap[userMessageText]) {
-        // Replace thinking message with actual response
+      if (conversationFlow[userMessageText]) {
+        const { response, suggestions } = conversationFlow[userMessageText];
         const aiMessage: Message = {
           id: (Date.now() + 2).toString(),
-          content: [{ text: responseMap[userMessageText] }],
+          content: [{ text: response }],
           role: 'assistant',
           createdAt: new Date().toISOString(),
           conversationId: '1'
         };
         setMessages(prev => {
-          // Remove the "Thinking..." message and add the real response
           const updatedMessages = prev.filter(msg => msg.content[0].text !== "Thinking...");
           return [...updatedMessages, aiMessage];
         });
+        setCurrentSuggestions(suggestions);
       } else {
-        // Replace thinking message with suggestions card
-        const suggestionsCard: Message = {
+        // Reset to initial suggestions when answer not found
+        const resetMessage: Message = {
           id: (Date.now() + 2).toString(),
           content: [{
-            text: `Please choose from the suggestions below:\n\n${suggestions.map((suggestion, index) =>
-              `${index + 1}. ${suggestion}`
-            ).join('\n')}`
+            text: "Sorry, I didn't understand that. Let's start over. Please choose from these suggestions:\n\n" +
+                  `${initialSuggestions.map((suggestion, index) => `${index + 1}. ${suggestion}`).join('\n')}`
           }],
           role: 'assistant',
           createdAt: new Date().toISOString(),
           conversationId: '1'
         };
         setMessages(prev => {
-          // Remove the "Thinking..." message and add the suggestions card
           const updatedMessages = prev.filter(msg => msg.content[0].text !== "Thinking...");
-          return [...updatedMessages, suggestionsCard];
+          return [...updatedMessages, resetMessage];
         });
+        setCurrentSuggestions(initialSuggestions);
       }
       setIsThinking(false);
-    }, 1000); // 1-second delay to simulate thinking
+    }, 1000);
   };
 
-  // Handler for suggestion clicks with loading state
   const handleSuggestionClick = (suggestion: string) => {
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       content: [{ text: suggestion }],
@@ -115,7 +146,6 @@ export default function ChatInterface() {
     };
     setMessages(prev => [...prev, userMessage]);
 
-    // Show thinking state
     setIsThinking(true);
     const thinkingMessage: Message = {
       id: (Date.now() + 1).toString(),
@@ -126,31 +156,45 @@ export default function ChatInterface() {
     };
     setMessages(prev => [...prev, thinkingMessage]);
 
-    // Simulate AI processing with a delay
     setTimeout(() => {
-      // Replace thinking message with actual response
-      const aiMessage: Message = {
-        id: (Date.now() + 2).toString(),
-        content: [{ text: responseMap[suggestion] }],
-        role: 'assistant',
-        createdAt: new Date().toISOString(),
-        conversationId: '1'
-      };
-      setMessages(prev => {
-        // Remove the "Thinking..." message and add the real response
-        const updatedMessages = prev.filter(msg => msg.content[0].text !== "Thinking...");
-        return [...updatedMessages, aiMessage];
-      });
+      if (conversationFlow[suggestion]) {
+        const { response, suggestions } = conversationFlow[suggestion];
+        const aiMessage: Message = {
+          id: (Date.now() + 2).toString(),
+          content: [{ text: response }],
+          role: 'assistant',
+          createdAt: new Date().toISOString(),
+          conversationId: '1'
+        };
+        setMessages(prev => {
+          const updatedMessages = prev.filter(msg => msg.content[0].text !== "Thinking...");
+          return [...updatedMessages, aiMessage];
+        });
+        setCurrentSuggestions(suggestions);
+      } else {
+        // Reset to initial suggestions when answer not found
+        const resetMessage: Message = {
+          id: (Date.now() + 2).toString(),
+          content: [{
+            text: "Sorry, I didn't understand that. Let's start over. Please choose from these suggestions:\n\n" +
+                  `${initialSuggestions.map((suggestion, index) => `${index + 1}. ${suggestion}`).join('\n')}`
+          }],
+          role: 'assistant',
+          createdAt: new Date().toISOString(),
+          conversationId: '1'
+        };
+        setMessages(prev => {
+          const updatedMessages = prev.filter(msg => msg.content[0].text !== "Thinking...");
+          return [...updatedMessages, resetMessage];
+        });
+        setCurrentSuggestions(initialSuggestions);
+      }
       setIsThinking(false);
-    }, 1000); // 1-second delay to simulate thinking
+    }, 1000);
   };
 
   return (
     <View className="chat-container">
-      {/* Suggestions Box */}
-
-
-      {/* AI Conversation */}
       <AIConversation
         messages={messages}
         welcomeMessage={
@@ -162,17 +206,15 @@ export default function ChatInterface() {
             boxShadow="0 4px 10px rgba(0, 0, 0, 0.08)"
           >
             <Flex direction="column" gap={tokens.space.medium}>
-
               <Text color={tokens.colors.font.secondary}>
-                Try one of the suggestions above to get started!
+                Try one of the suggestions below to get started!
               </Text>
             </Flex>
           </Card>
         }
         messageRenderer={{
           text: ({ text }: { text: string }): JSX.Element => {
-            // Check if the message contains suggestions
-            if (text.includes('Please choose from the suggestions below:')) {
+            if (text.includes('Please choose from these suggestions:')) {
               return (
                 <Card
                   variation="elevated"
@@ -183,9 +225,9 @@ export default function ChatInterface() {
                 >
                   <Flex direction="column" gap={tokens.space.medium}>
                     <Text fontSize="16px" color={tokens.colors.font.primary}>
-                      Please choose from the suggestions below:
+                      Sorry, I didn't understand that. Let's start over. Please choose from these suggestions:
                     </Text>
-                    {suggestions.map((suggestion, index) => (
+                    {initialSuggestions.map((suggestion, index) => (
                       <Button
                         key={index}
                         onClick={() => handleSuggestionClick(suggestion)}
@@ -221,7 +263,7 @@ export default function ChatInterface() {
         borderRadius="8px"
         marginBottom={tokens.space.medium}
       >
-        {suggestions.map((suggestion, index) => (
+        {currentSuggestions.map((suggestion, index) => (
           <Button
             key={index}
             onClick={() => handleSuggestionClick(suggestion)}
