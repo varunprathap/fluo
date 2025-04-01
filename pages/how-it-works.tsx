@@ -72,9 +72,16 @@ export default function ChatInterface() {
   const initialSuggestions = ["How many employees do I have?", "How many casual employees?"];
 
   useEffect(() => {
-    setCurrentSuggestions(initialSuggestions);
-    inputRef.current?.focus();
-  }, []);
+    // Add initial welcome message
+    const welcomeMessage: Message = {
+      id: Date.now().toString(),
+      content: [{ text: "Welcome to Fluo.ai! How can I help you today?" }],
+      role: 'assistant',
+      createdAt: new Date().toISOString(),
+      conversationId: '1'
+    };
+    setMessages([welcomeMessage]);
+  }, []); // Remove initialSuggestions from dependencies since it's a constant
 
   const handleSendMessage = async (input: SendMesageParameters) => {
     if (!input.content?.[0]?.text?.trim()) return;
@@ -119,7 +126,7 @@ export default function ChatInterface() {
         const resetMessage: Message = {
           id: (Date.now() + 2).toString(),
           content: [{
-            text: "Sorry, I didn't understand that. Let's start over. Please choose from these suggestions:\n\n" +
+            text: "Sorry, I didn&apos;t understand that. Let&apos;s start over. Please choose from these suggestions:\n\n" +
                   `${initialSuggestions.map((suggestion, index) => `${index + 1}. ${suggestion}`).join('\n')}`
           }],
           role: 'assistant',
@@ -176,7 +183,7 @@ export default function ChatInterface() {
         const resetMessage: Message = {
           id: (Date.now() + 2).toString(),
           content: [{
-            text: "Sorry, I didn't understand that. Let's start over. Please choose from these suggestions:\n\n" +
+            text: "Sorry, I didn&apos;t understand that. Let&apos;s start over. Please choose from these suggestions:\n\n" +
                   `${initialSuggestions.map((suggestion, index) => `${index + 1}. ${suggestion}`).join('\n')}`
           }],
           role: 'assistant',
@@ -225,7 +232,7 @@ export default function ChatInterface() {
                 >
                   <Flex direction="column" gap={tokens.space.medium}>
                     <Text fontSize="16px" color={tokens.colors.font.primary}>
-                      Sorry, I didn't understand that. Let's start over. Please choose from these suggestions:
+                      Sorry, I didn&apos;t understand that. Let&apos;s start over. Please choose from these suggestions:
                     </Text>
                     {initialSuggestions.map((suggestion, index) => (
                       <Button
