@@ -36,35 +36,35 @@ export default function ChatInterface() {
     },
     "How many of them are working today?": {
       response: "You have 3 casuals working today.",
-      suggestions: ["What are their shift details?", "What's the total payment for today?"]
+      suggestions: ["What are their shift details?", "What\'s the total payment for today?"]
     },
     "What are their shift details?": {
       response: "All 3 casuals are working the morning shift from 09:00am to 02:30pm with a 30mins lunch break.",
-      suggestions: ["What's the total payment for today?", "Who is managing them?"]
+      suggestions: ["What\'s the total payment for today?", "Who is managing them?"]
     },
-    "What's the total payment for today?": {
+    "What\'s the total payment for today?": {
       response: "The total estimated payment for today is $540 for the 3 casuals.",
-      suggestions: ["What about permanent employees?", "What's the weekly total?"]
+      suggestions: ["What about permanent employees?", "What\'s the weekly total?"]
     },
     "What about permanent employees?": {
       response: "You have 5 permanent employees, none scheduled for today.",
-      suggestions: ["What's their weekly schedule?", "What's the monthly payroll?"]
+      suggestions: ["What\'s their weekly schedule?", "What\'s the monthly payroll?"]
     },
-    "What's their weekly schedule?": {
+    "What\'s their weekly schedule?": {
       response: "Permanent employees work Monday-Friday, 9am-5pm.",
-      suggestions: ["What's the monthly payroll?", "Any overtime this week?"]
+      suggestions: ["What\'s the monthly payroll?", "Any overtime this week?"]
     },
-    "What's the monthly payroll?": {
+    "What\'s the monthly payroll?": {
       response: "The monthly payroll for all employees is approximately $12,000.",
-      suggestions: ["Any overtime this week?", "What's the annual cost?"]
+      suggestions: ["Any overtime this week?", "What\'s the annual cost?"]
     },
     "Any overtime this week?": {
       response: "No overtime recorded this week for any employees.",
-      suggestions: ["What's the annual cost?", "What's the leave balance?"]
+      suggestions: ["What\'s the annual cost?", "What\'s the leave balance?"]
     },
-    "What's the annual cost?": {
+    "What\'s the annual cost?": {
       response: "The annual employment cost is approximately $144,000.",
-      suggestions: ["What's the leave balance?", "How many employees do I have?"] // Loop back
+      suggestions: ["What\'s the leave balance?", "How many employees do I have?"] // Loop back
     }
   };
 
@@ -72,7 +72,7 @@ export default function ChatInterface() {
   const initialSuggestions = ["How many employees do I have?", "How many casual employees?"];
 
   useEffect(() => {
-    // Add initial welcome message
+    // Add initial welcome message and set initial suggestions
     const welcomeMessage: Message = {
       id: Date.now().toString(),
       content: [{ text: "Welcome to Fluo.ai! How can I help you today?" }],
@@ -81,7 +81,8 @@ export default function ChatInterface() {
       conversationId: '1'
     };
     setMessages([welcomeMessage]);
-  }, []); // Remove initialSuggestions from dependencies since it's a constant
+    setCurrentSuggestions(initialSuggestions);
+  }, []);
 
   const handleSendMessage = async (input: SendMesageParameters) => {
     if (!input.content?.[0]?.text?.trim()) return;
@@ -126,7 +127,7 @@ export default function ChatInterface() {
         const resetMessage: Message = {
           id: (Date.now() + 2).toString(),
           content: [{
-            text: "Sorry, I didn&apos;t understand that. Let&apos;s start over. Please choose from these suggestions:\n\n" +
+            text: "Sorry, I didn\'t understand that. Let\'s start over. Please choose from these suggestions:\n\n" +
                   `${initialSuggestions.map((suggestion, index) => `${index + 1}. ${suggestion}`).join('\n')}`
           }],
           role: 'assistant',
@@ -183,7 +184,7 @@ export default function ChatInterface() {
         const resetMessage: Message = {
           id: (Date.now() + 2).toString(),
           content: [{
-            text: "Sorry, I didn&apos;t understand that. Let&apos;s start over. Please choose from these suggestions:\n\n" +
+            text: "Please choose from these suggestions:\n\n" +
                   `${initialSuggestions.map((suggestion, index) => `${index + 1}. ${suggestion}`).join('\n')}`
           }],
           role: 'assistant',
@@ -232,7 +233,7 @@ export default function ChatInterface() {
                 >
                   <Flex direction="column" gap={tokens.space.medium}>
                     <Text fontSize="16px" color={tokens.colors.font.primary}>
-                      Sorry, I didn&apos;t understand that. Let&apos;s start over. Please choose from these suggestions:
+                      Please choose from these suggestions:
                     </Text>
                     {initialSuggestions.map((suggestion, index) => (
                       <Button
