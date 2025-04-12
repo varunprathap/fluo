@@ -128,7 +128,7 @@ export default function App() {
       
     </section>
 
-    <section>
+    <section className="features">
     <div className="mt-10 flex justify-center">
         <div>
           <h2 className="text-xl font-semibold mb-4 text-center">TL;DR:</h2>
@@ -220,7 +220,7 @@ export default function App() {
       </section> */}
 
       {/* Footer */}
-      <footer>
+      <footer className="mt-12 py-4 bg-gray-100 text-center">
         <p>© 2025 Fluo. All rights reserved.</p>
       </footer>
     </div>
