@@ -15,10 +15,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Home className="w-5 h-5" />
               <span className="hidden md:inline">Home</span>
             </Link>
-            <Link href="/how-it-works" className="flex items-center gap-2 text-lg font-medium hover:text-purple-600 transition-colors group">
+            {/* <Link href="/how-it-works" className="flex items-center gap-2 text-lg font-medium hover:text-purple-600 transition-colors group">
               <MessageCircle className="w-5 h-5" />
               <span className="hidden md:inline">How it Works</span>
-            </Link>
+            </Link> */}
             <Link href="/login" className="flex items-center gap-2 text-lg font-medium hover:text-purple-600 transition-colors group">
               <LogIn className="w-5 h-5" />
               <span className="hidden md:inline">Join the flou</span>

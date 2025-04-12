@@ -1,24 +1,63 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 import Link from "next/link";
 import { Space_Grotesk } from "next/font/google";
-import { 
-  Zap, 
-  ArrowRight, 
-  BarChart3, 
-  CheckCircle2, 
-  Bot, 
+import {
+  Zap,
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  Bot,
   Rocket,
   HandshakeIcon,
   Mail,
   Sparkles
 } from "lucide-react";
 
+
+
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"] });
 const client = generateClient<Schema>();
 
 export default function App() {
+
+
+
+  const tickerRefs = [useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null)];
+  const words = [
+    'Payroll',
+    'Enterprise agreement',
+    'Award interpretation',
+    'Time attendance',
+    'Rostering',
+    'Compliance',
+    'Workforce analytics',
+  ];
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [isFlipping, setIsFlipping] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsFlipping(true);
+
+      // Update the word index immediately when the flip starts
+      setCurrentWordIndex((prev) => {
+        let next;
+        do {
+          next = Math.floor(Math.random() * words.length);
+        } while (next === prev);
+        return next;
+      });
+
+      // Reset isFlipping after the animation duration
+      setTimeout(() => {
+        setIsFlipping(false);
+      }, 1000); // Match this with your CSS animation duration
+    }, 2000); // Interval for flipping every 2 seconds
+
+    return () => clearInterval(interval);
+  }, [words.length]);
   // const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
 
   // function listTodos() {
@@ -59,17 +98,69 @@ export default function App() {
   return (
     <div className={`${spaceGrotesk.className} min-h-screen bg-white text-gray-900`}>
       {/* Hero Section */}
-      <section className="hero">
+      {/* <section className="hero">
         <h1 className="flex items-center justify-center gap-4">
           Fluo OS <Zap size={57} className="h-12 w-12 text-[#6C3BFF]" />
         </h1>
         <p className="flex items-center justify-center gap-2">
           Work flows effortlessly. Redefine time attendance and rostering with AI.
+          
         </p>
-      </section>
+      </section> */}
 
+
+     <section className="hero py-12">
+      <h1 className="fluo-heading">
+        Fluo OS{" "}
+        <Zap
+          size={57}
+          className="h-8 w-8 text-[#6C3BFF] sm:h-12 sm:w-12"
+        />
+      </h1>
+      <div className="flex flex-col items-center justify-center gap-4 mt-6 text-lg text-center">
+        <p>
+          <span className="fluo-ticker animate-ticker">
+            {isFlipping ? words[currentWordIndex] : words[currentWordIndex]}
+          </span>{' '}
+          is <span className="line-through">complex</span>; complicated.
+        </p>
+      </div>
+      
+    </section>
+
+    <section>
+    <div className="mt-10 flex justify-center">
+        <div>
+          <h2 className="text-xl font-semibold mb-4 text-center">TL;DR:</h2>
+          <table className="table-auto border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 px-4 py-2">Word</th>
+                <th className="border border-gray-300 px-4 py-2">Solvability</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border border-gray-300 px-4 py-2">Complicated</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  Can be solved — messy but fixable
+                </td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 px-4 py-2">Complex</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  Harder to solve — deep, layered, and is dynamic and inherently
+                  uncertain.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
       {/* Features Section */}
-      <section className="features">
+      {/* <section className="features">
         <div className="feature">
           <ArrowRight className="h-8 w-8 text-[#6C3BFF] mb-4" />
           <h3>Seamless Flow</h3>
@@ -85,18 +176,18 @@ export default function App() {
           </p>
         </div>
         <div className="feature">
-         
-         <CheckCircle2 className="h-8 w-8 text-[#6C3BFF] mb-4 justify-center" />
+
+          <CheckCircle2 className="h-8 w-8 text-[#6C3BFF] mb-4 justify-center" />
           <h3>Built-In Compliance</h3>
           <p>
             Stay ahead with effortless regulation tracking.
           </p>
-         
+
         </div>
-      </section>
+      </section> */}
 
       {/* AI Agent Section */}
-      <section className="ai-brain">
+      {/* <section className="ai-brain">
         <h2 className="flex items-center justify-center gap-2">Meet Your AI Brain <Bot className="h-12 w-12 text-[#6C3BFF]" /></h2>
         <p>
           Powered by advanced AI, Fluo learns your preferences and adapts to your
@@ -104,16 +195,16 @@ export default function App() {
         </p>
         <div className="ai-brain-top-padding">
           <Link href="/how-it-works" className="button button-secondary">
-          <span className="flex items-center justify-center gap-2">
-            How it Works
-          </span>
+            <span className="flex items-center justify-center gap-2">
+              How it Works
+            </span>
           </Link>
         </div>
-      </section>
+      </section> */}
 
 
       {/* CTA Section */}
-      <section id="get-started" className="cta">
+      {/* <section id="get-started" className="cta">
         <h2>Ready to Flow?</h2>
         <p className="flex items-center justify-center gap-2">
           Simplify work for everyone. Join the waitlist today.
@@ -121,18 +212,16 @@ export default function App() {
         <div className="cta-buttons">
           <Link href="mailto:varun@vibing.com.au" className="button button-primary">
             <span className="flex items-center justify-center gap-2">
-              Join the Flow 
+              Join the Flow
             </span>
           </Link>
-          
+
         </div>
-      </section>
+      </section> */}
 
       {/* Footer */}
-      <footer className="py-6 text-center text-gray-500">
-        <p className="flex items-center justify-center gap-2">
-          © 2025 Fluo. All rights reserved.
-        </p>
+      <footer>
+        <p>© 2025 Fluo. All rights reserved.</p>
       </footer>
     </div>
   );

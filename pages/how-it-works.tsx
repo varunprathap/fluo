@@ -84,6 +84,8 @@ export default function ChatInterface() {
     setCurrentSuggestions(initialSuggestions);
   }, []);
 
+ 
+
   const handleSendMessage = async (input: SendMesageParameters) => {
     if (!input.content?.[0]?.text?.trim()) return;
 
@@ -262,7 +264,7 @@ export default function ChatInterface() {
         handleSendMessage={handleSendMessage}
       />
 
-      <Flex
+      <Flex 
         direction="row"
         gap={tokens.space.medium}
         padding={tokens.space.medium}
