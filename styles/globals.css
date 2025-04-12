@@ -381,7 +381,7 @@ footer p {
   }
 
   .hero h1 {
-    font-size: 96px;
+    font-size: 57px;
   }
 
   .hero p {
@@ -415,7 +415,7 @@ footer p {
   }
 
   .hero h1 {
-    font-size: 72px;
+    font-size: 47px;
   }
 
   .hero p {
@@ -503,9 +503,6 @@ footer p {
     gap: 16px;
   }
 
-  footer {
-    padding: 32px 16px;
-  }
 
   footer p {
     font-size: 14px;
@@ -552,7 +549,7 @@ footer p {
   }
 
   .hero h1 {
-    font-size: 42px;
+    font-size: 37px;
     margin-bottom: 12px;
   }
 
@@ -562,9 +559,7 @@ footer p {
     padding: 40px 16px;
   }
 
-  footer {
-    padding: 20px 16px;
-  }
+ 
 }
 
 .ai-brain-top-padding {

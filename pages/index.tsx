@@ -4,15 +4,7 @@ import type { Schema } from "@/amplify/data/resource";
 import Link from "next/link";
 import { Space_Grotesk } from "next/font/google";
 import {
-  Zap,
-  ArrowRight,
-  BarChart3,
-  CheckCircle2,
-  Bot,
-  Rocket,
-  HandshakeIcon,
-  Mail,
-  Sparkles
+  Route
 } from "lucide-react";
 
 
@@ -96,7 +88,7 @@ export default function App() {
   // );
 
   return (
-    <div className={`${spaceGrotesk.className} min-h-screen bg-white text-gray-900`}>
+    <div className={`${spaceGrotesk.className} text-gray-900`}>
       {/* Hero Section */}
       {/* <section className="hero">
         <h1 className="flex items-center justify-center gap-4">
@@ -112,7 +104,7 @@ export default function App() {
      <section className="hero py-12">
       <h1 className="fluo-heading">
         Fluo OS{" "}
-        <Zap
+        <Route
           size={57}
           className="h-8 w-8 text-[#6C3BFF] sm:h-12 sm:w-12"
         />
@@ -202,27 +194,7 @@ export default function App() {
         </div>
       </section> */}
 
-
-      {/* CTA Section */}
-      {/* <section id="get-started" className="cta">
-        <h2>Ready to Flow?</h2>
-        <p className="flex items-center justify-center gap-2">
-          Simplify work for everyone. Join the waitlist today.
-        </p>
-        <div className="cta-buttons">
-          <Link href="mailto:varun@vibing.com.au" className="button button-primary">
-            <span className="flex items-center justify-center gap-2">
-              Join the Flow
-            </span>
-          </Link>
-
-        </div>
-      </section> */}
-
-      {/* Footer */}
-      <footer className="mt-12 py-4 bg-gray-100 text-center">
-        <p>© 2025 Fluo. All rights reserved.</p>
-      </footer>
+     
     </div>
   );
 }
