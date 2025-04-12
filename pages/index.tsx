@@ -123,7 +123,6 @@ export default function App() {
     <section className="features">
     <div className="mt-10 flex justify-center">
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-center">TL;DR:</h2>
           <table className="table-auto border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
