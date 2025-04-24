@@ -40,7 +40,7 @@
   --primary-color: #6C3BFF;
   --secondary-color: #38BDF8;
   --accent-color: #7DD3FC;
-  --background-color: #F8F7FF;
+  --background-color: #f8f9fa;
   --text-color: #1A1A1A;
   --text-secondary: #666666;
 }
@@ -108,7 +108,7 @@ body::before {
   background-size: 200% 200%;
   animation: gentleFlow 15s ease infinite;
   z-index: -1;
-  opacity: 1;
+  opacity: 0;
 }
 
 @keyframes ticker {
@@ -1039,4 +1039,48 @@ footer p {
 .floating-toolbar button.active {
   background: #6C3BFF;
   color: white;
+}
+
+/* Add these styles for the admin sidebar */
+.admin-sidebar {
+  background-color: #ffffff;
+  color: #374151;
+  width: 250px;
+  padding: 1.5rem;
+  border-right: 1px solid #e5e7eb;
+}
+
+.admin-sidebar .nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  margin: 0.25rem 0;
+  border-radius: 0.5rem;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.admin-sidebar .nav-item:hover {
+  background-color: #f0ebff;
+  color: #6C3BFF;
+}
+
+.admin-sidebar .nav-item.active {
+  background-color: #6C3BFF;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.admin-sidebar .section-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #9ca3af;
+  margin: 1.5rem 0 0.75rem;
+  padding-left: 1rem;
+}
+
+.admin-sidebar .icon {
+  margin-right: 0.75rem;
+  width: 20px;
+  height: 20px;
 } 
