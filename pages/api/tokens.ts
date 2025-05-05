@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { DynamoDB } from 'aws-sdk';
-import { getCurrentUser } from 'aws-amplify/auth';
 
 // Configure DynamoDB with region
 const dynamoDb = new DynamoDB.DocumentClient({
@@ -10,10 +9,14 @@ const dynamoDb = new DynamoDB.DocumentClient({
 });
 
 interface TokenData {
-  token: string;
-  expiresAt?: string;
-  createdAt: string;
+  id: number;
   userId: string;
+  access_token: string;
+  refresh_token?: string;
+  expires_in?: number;
+  expires_at?: string;
+  createdAt: string;
+  provider: 'google';
 }
 
 /**
@@ -31,28 +34,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   console.log(`[${requestId}] ${req.method} ${req.url}`);
 
   try {
-    // Verify user authentication
-    // const user = await getCurrentUser();
-    
-    // if (!user) {
-    //   console.error(`[${requestId}] Unauthorized: No authenticated user found`);
-    //   return res.status(401).json({ error: 'Unauthorized' });
-    // }
+    // Using hardcoded user ID
+    const userId = 'varun@vibing.com.au';
 
     switch (req.method) {
       case 'POST': {
-        const { token, expiresAt } = req.body;
+        const { access_token, refresh_token, expires_in } = req.body;
         
         // Validate input
-        if (!token) {
-          console.error(`[${requestId}] Bad Request: Token is required`);
-          return res.status(400).json({ error: 'Token is required' });
+        if (!access_token) {
+          console.error(`[${requestId}] Bad Request: Access token is required`);
+          return res.status(400).json({ error: 'Access token is required' });
         }
 
-        if (expiresAt && isNaN(Date.parse(expiresAt))) {
-          console.error(`[${requestId}] Bad Request: Invalid expiresAt format`);
-          return res.status(400).json({ error: 'Valid expiresAt is required in ISO 8601 format' });
-        }
+        // Calculate expiration date if expires_in is provided
+        const expiresAt = expires_in 
+          ? new Date(Date.now() + expires_in * 1000).toISOString()
+          : undefined;
 
         // Check table name
         if (!process.env.TOKENS_TABLE_NAME) {
@@ -61,74 +59,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         try {
-          // First, check for existing token
+          // First, find and delete any existing tokens
           const existingToken = await dynamoDb.query({
             TableName: process.env.TOKENS_TABLE_NAME,
-            IndexName: 'userId', // Assuming you have a GSI on userId
+            IndexName: 'userId',
             KeyConditionExpression: 'userId = :userId',
             ExpressionAttributeValues: {
-              ':userId': 'varun@vibing.com.au'
+              ':userId': userId
             }
           }).promise();
 
-          // If existing token found, delete it
           if (existingToken.Items && existingToken.Items.length > 0) {
-            console.log(`[${requestId}] Found existing token, removing...`);
+            const tokenToDelete = existingToken.Items[0];
             await dynamoDb.delete({
               TableName: process.env.TOKENS_TABLE_NAME,
-              Key: { id: existingToken.Items[0].id }
+              Key: { id: tokenToDelete.id }
             }).promise();
           }
 
-          // Save new token with retry logic
-          const maxRetries = 3;
-          let attempt = 0;
-          let success = false;
-          let lastError: Error | null = null;
+          // Save new token
+          const tokenData: TokenData = {
+            id: Date.now(),
+            userId,
+            access_token,
+            refresh_token,
+            expires_in,
+            expires_at: expiresAt,
+            createdAt: new Date().toISOString(),
+            provider: 'google'
+          };
 
-          while (attempt < maxRetries && !success) {
-            try {
-              const tokenData: TokenData = {
-                id: Date.now(),
-                userId: 'varun@vibing.com.au',
-                token,
-                createdAt: new Date().toISOString(),
-                ...(expiresAt && { expiresAt })
-              };
+          await dynamoDb.put({
+            TableName: process.env.TOKENS_TABLE_NAME,
+            Item: tokenData
+          }).promise();
 
-              await dynamoDb.put({
-                TableName: process.env.TOKENS_TABLE_NAME,
-                Item: tokenData
-              }).promise();
-
-              console.log(`[${requestId}] Successfully saved new token for user varun@vibing.com.au`);
-              success = true;
-            } catch (error) {
-              lastError = error as Error;
-              attempt++;
-              console.warn(`[${requestId}] Retry attempt ${attempt} failed:`, error);
-              
-              if (attempt < maxRetries) {
-                const delay = Math.pow(2, attempt) * 100;
-                console.log(`[${requestId}] Waiting ${delay}ms before retry...`);
-                await new Promise(resolve => setTimeout(resolve, delay));
-              }
-            }
-          }
-
-          if (!success) {
-            console.error(`[${requestId}] Failed to save token after ${maxRetries} attempts:`, lastError);
-            return res.status(500).json({ 
-              error: 'Failed to save token',
-              details: lastError?.message
-            });
-          }
-
+          console.log(`[${requestId}] Successfully saved token for user ${userId}`);
           return res.status(200).json({ success: true });
         } catch (error) {
-          console.error(`[${requestId}] Error in token management:`, error);
+          console.error(`[${requestId}] Error saving token:`, error);
           return res.status(500).json({ 
-            error: 'Failed to manage token',
+            error: 'Failed to save token',
             details: (error as Error).message
           });
         }
@@ -141,18 +112,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         try {
-          const result = await dynamoDb.get({
+          // Query using userId-index GSI
+          const result = await dynamoDb.query({
             TableName: process.env.TOKENS_TABLE_NAME,
-            Key: { userId: 'varun@vibing.com.au' }
+            IndexName: 'userId',
+            KeyConditionExpression: 'userId = :userId',
+            ExpressionAttributeValues: {
+              ':userId': userId
+            }
           }).promise();
 
-          if (!result.Item) {
-            console.log(`[${requestId}] Token not found for user `);
+          if (!result.Items || result.Items.length === 0) {
+            console.log(`[${requestId}] Token not found for user ${userId}`);
             return res.status(404).json({ error: 'Token not found' });
           }
 
-          console.log(`[${requestId}] Successfully retrieved token for user`);
-          return res.status(200).json(result.Item);
+          // Get the most recent token
+          const mostRecentToken = result.Items.sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )[0];
+
+          console.log(`[${requestId}] Successfully retrieved token for user ${userId}`);
+          return res.status(200).json(mostRecentToken);
         } catch (error) {
           console.error(`[${requestId}] Error retrieving token:`, error);
           return res.status(500).json({ 
@@ -169,12 +150,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         try {
-          await dynamoDb.delete({
+          // First, find the token using the GSI
+          const queryResult = await dynamoDb.query({
             TableName: process.env.TOKENS_TABLE_NAME,
-            Key: { userId: 'varun@vibing.com.au' }
+            IndexName: 'userId',
+            KeyConditionExpression: 'userId = :userId',
+            ExpressionAttributeValues: {
+              ':userId': userId
+            }
           }).promise();
 
-          console.log(`[${requestId}] Successfully deleted token for user varun@vibing.com.au`);
+          if (!queryResult.Items || queryResult.Items.length === 0) {
+            console.log(`[${requestId}] No token found to delete for user ${userId}`);
+            return res.status(404).json({ error: 'Token not found' });
+          }
+
+          // Get the most recent token
+          const tokenToDelete = queryResult.Items.sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )[0];
+
+          // Delete using the primary key (id)
+          await dynamoDb.delete({
+            TableName: process.env.TOKENS_TABLE_NAME,
+            Key: { id: tokenToDelete.id }
+          }).promise();
+
+          console.log(`[${requestId}] Successfully deleted token for user ${userId}`);
           return res.status(200).json({ success: true });
         } catch (error) {
           console.error(`[${requestId}] Error deleting token:`, error);
