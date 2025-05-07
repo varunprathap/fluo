@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import AdminLayout from './layout';
+import AdminLayout from '../../components/admin/AdminLayout';
 
 const AdminDashboard = () => {
   const [licenses, setLicenses] = useState({

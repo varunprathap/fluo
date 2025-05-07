@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-import AdminLayout from "../../admin/layout";
+import AdminLayout from "../layout";
 import { googleAuthConfig } from "@/config/googleAuthConfig";
-import { useRouter } from 'next/router';
+import { useRouter, usePathname } from 'next/navigation';
 
 const GoogleAuthPage = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -118,7 +119,7 @@ const GoogleAuthPage = () => {
   // Check token status on mount and when route changes
   useEffect(() => {
     checkTokenStatus();
-  }, [checkTokenStatus, router.pathname]);
+  }, [checkTokenStatus, pathname]);
 
   useEffect(() => {
     const checkUrlForToken = async () => {

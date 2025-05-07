@@ -1,10 +1,19 @@
+'use client';
+
+import { Authenticator } from '@aws-amplify/ui-react';
+import { Amplify } from 'aws-amplify';
+import '@aws-amplify/ui-react/styles.css';
+import outputs from "../../amplify_outputs.json";
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Home, Users, Activity, CreditCard, Settings, MoreHorizontal, Menu, X } from 'lucide-react';
-import { useRouter } from 'next/router';
+import { Home, Users, Activity, CreditCard, Settings, MoreHorizontal, Menu, X, LogOut } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
+// Configure Amplify
+Amplify.configure(outputs);
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+  const pathname = usePathname();
   const [isProductsExpanded, setIsProductsExpanded] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [expandedHeight, setExpandedHeight] = useState('0px');
@@ -34,7 +43,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <path fill="currentColor" d="M4.5 4.5v15h15v-15h-15zm1.5 1.5h12v12H6v-12z"/>
             </svg>
           </div>
-          <h2 className="text-lg font-semibold ml-2">Admin console</h2>
+
           <button 
             className="ml-auto -mr-4 p-2 rounded-lg hover:bg-gray-700 lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
@@ -42,7 +51,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <X className="w-6 h-6" />
           </button>
         </div>
-        
         {/* Team Section */}
         <div className="mb-6">
           <p className="text-sm text-gray-500 mb-4">Team</p>
@@ -50,7 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link 
               href="/admin" 
               className={`flex items-center space-x-3 py-2 text-sm ${
-                router.pathname === '/admin' 
+                pathname === '/admin' 
                   ? 'text-white' 
                   : 'text-gray-400 hover:text-white'
               }`}
@@ -61,7 +69,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link 
               href="/admin/members"
               className={`flex items-center space-x-3 py-2 text-sm ${
-                router.pathname === '/admin/members'
+                pathname === '/admin/members'
                   ? 'text-white'
                   : 'text-gray-400 hover:text-white'
               }`}
@@ -72,7 +80,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link 
               href="/admin/groups"
               className={`flex items-center space-x-3 py-2 text-sm ${
-                router.pathname === '/admin/groups'
+                pathname === '/admin/groups'
                   ? 'text-white'
                   : 'text-gray-400 hover:text-white'
               }`}
@@ -83,7 +91,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link 
               href="/admin/activity"
               className={`flex items-center space-x-3 py-2 text-sm ${
-                router.pathname === '/admin/activity'
+                pathname === '/admin/activity'
                   ? 'text-white'
                   : 'text-gray-400 hover:text-white'
               }`}
@@ -94,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link 
               href="/admin/billing"
               className={`flex items-center space-x-3 py-2 text-sm ${
-                router.pathname === '/admin/billing'
+                pathname === '/admin/billing'
                   ? 'text-white'
                   : 'text-gray-400 hover:text-white'
               }`}
@@ -105,7 +113,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link 
               href="/admin/settings"
               className={`flex items-center space-x-3 py-2 text-sm ${
-                router.pathname === '/admin/settings'
+                pathname === '/admin/settings'
                   ? 'text-white'
                   : 'text-gray-400 hover:text-white'
               }`}
@@ -116,7 +124,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link 
               href="/admin/support"
               className={`flex items-center space-x-3 py-2 text-sm ${
-                router.pathname === '/admin/support'
+                pathname === '/admin/support'
                   ? 'text-white'
                   : 'text-gray-400 hover:text-white'
               }`}
@@ -132,35 +140,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
           </nav>
         </div>
-
         {/* Products Section */}
         <div className="mt-8">
           <p className="text-sm text-gray-500 mb-4">Products</p>
           <div className="space-y-1">
             <div className="group">
-              <button 
-                onClick={() => setIsProductsExpanded(!isProductsExpanded)}
-                className="w-full flex items-center justify-between text-sm text-gray-400 hover:text-white py-2"
-              >
+              <div className="w-full flex items-center justify-between text-sm text-gray-400 py-2">
                 <span>fluo</span>
-                <svg 
-                  className={`w-4 h-4 transform transition-transform ${isProductsExpanded ? 'rotate-180' : ''}`} 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <div 
-                id="expandable-content"
-                className={`pl-4 space-y-2 overflow-hidden transition-all duration-200`}
-                style={{ maxHeight: isProductsExpanded ? expandedHeight : '0', opacity: isProductsExpanded ? 1 : 0 }}
-              >
+              </div>
+              <div className="pl-4 space-y-2">
                 <Link 
                   href="/admin/dash/overview" 
                   className={`block py-2 text-sm ${
-                    router.pathname === '/admin/dash/overview'
+                    pathname === '/admin/dash/overview'
                       ? 'text-white'
                       : 'text-gray-400 hover:text-white'
                   }`}
@@ -170,7 +162,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link 
                   href="/admin/dash/apps" 
                   className={`block py-2 text-sm ${
-                    router.pathname === '/admin/dash/apps'
+                    pathname === '/admin/dash/apps'
                       ? 'text-white'
                       : 'text-gray-400 hover:text-white'
                   }`}
@@ -180,7 +172,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link 
                   href="/admin/dash/protect" 
                   className={`block py-2 text-sm ${
-                    router.pathname === '/admin/dash/protect'
+                    pathname === '/admin/dash/protect'
                       ? 'text-white'
                       : 'text-gray-400 hover:text-white'
                   }`}
@@ -190,7 +182,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link 
                   href="/admin/dash/history" 
                   className={`block py-2 text-sm ${
-                    router.pathname === '/admin/dash/history'
+                    pathname === '/admin/dash/history'
                       ? 'text-white'
                       : 'text-gray-400 hover:text-white'
                   }`}
@@ -200,7 +192,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link 
                   href="/admin/dash/settings" 
                   className={`block py-2 text-sm ${
-                    router.pathname === '/admin/dash/settings'
+                    pathname === '/admin/dash/settings'
                       ? 'text-white'
                       : 'text-gray-400 hover:text-white'
                   }`}
@@ -212,7 +204,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
       </div>
-      
       {/* Home button at bottom */}
       <div className="p-6 border-t border-gray-800">
         <Link 
@@ -225,41 +216,56 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
     </div>
   );
-  
+
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Mobile menu overlay */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
+    <Authenticator hideSignUp={true}>
+      {({ signOut, user }) => (
+        <div className="flex h-screen bg-gray-100">
+          {/* Mobile menu overlay */}
+          {isMobileMenuOpen && (
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+          )}
 
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 w-64 bg-gray-900 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
-        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-      } z-50`}>
-        <Sidebar />
-      </div>
+          {/* Sidebar */}
+          <div className={`fixed inset-y-0 left-0 w-64 bg-gray-900 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          } z-50`}>
+            <Sidebar />
+          </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden lg:ml-0">
-        {/* Mobile header */}
-        <div className="lg:hidden flex items-center p-4">
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="text-gray-500 hover:text-gray-600"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+          {/* Main content */}
+          <div className="flex-1 flex flex-col min-h-screen overflow-hidden lg:ml-0">
+            {/* Mobile header */}
+            <div className="lg:hidden flex items-center p-4">
+              <button
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="text-gray-500 hover:text-gray-600"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Top bar */}
+            <div className="flex justify-end items-center h-16 bg-white shadow p-2">
+              <button
+                onClick={signOut}
+                className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+
+            {/* Page content */}
+            <main className="flex-1 overflow-auto p-4">
+              {children}
+            </main>
+          </div>
         </div>
-
-        {/* Page content */}
-        <main className="flex-1 overflow-auto p-4">
-          {children}
-        </main>
-      </div>
-    </div>
+      )}
+    </Authenticator>
   );
 } 
