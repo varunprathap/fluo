@@ -4,6 +4,7 @@ import { Activity, Users, FileText, Clock, Search, Plus, HelpCircle, List, Folde
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import type { Components } from 'react-markdown';
+import { useRouter } from 'next/router';
 
 // Icon mapping for dynamic rendering
 const ICON_MAP: Record<string, string> = {
@@ -13,11 +14,6 @@ const ICON_MAP: Record<string, string> = {
   'Recent Search': '/icons/google_sheet.svg', // You can use a clock icon if you have one
 };
 
-const RECENT_QUERIES = [
-  'Fulltime employees'
-];
-
-// At the top level of the file, add this interface with other imports
 interface SourceItem {
   file_name?: string;
   name?: string;
@@ -29,6 +25,52 @@ interface SourceItem {
   supporting_text?: string;
   contribution?: string;
   additional_context?: string;
+}
+
+interface RecentQueries {
+  search: string[];
+  ask: string[];
+}
+
+function RecentQueries() {
+  const [recentQueries, setRecentQueries] = useState<RecentQueries>({ search: [], ask: [] });
+  const router = useRouter();
+  const isSearchPage = router.pathname.includes('/search');
+
+  useEffect(() => {
+    const fetchRecentQueries = async () => {
+      try {
+        const response = await fetch('/api/recent/recent');
+        const data = await response.json();
+        setRecentQueries(data);
+      } catch (error) {
+        console.error('Error fetching recent queries:', error);
+      }
+    };
+
+    fetchRecentQueries();
+  }, []);
+
+  // Only show queries relevant to current page
+  const relevantQueries = isSearchPage ? recentQueries.search : recentQueries.ask;
+  const title = isSearchPage ? 'Recent Searches' : 'Recent Asks';
+
+  if (relevantQueries.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 p-4 border border-gray-200 rounded-lg">
+      <h3 className="text-sm font-semibold text-gray-600 mb-2">{title}</h3>
+      <ul className="space-y-2">
+        {relevantQueries.map((query, index) => (
+          <li key={`${isSearchPage ? 'search' : 'ask'}-${index}`} className="text-sm text-gray-500">
+            {query}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 // Add this helper function before the Overview component
@@ -76,13 +118,12 @@ const Overview = () => {
   const [synapseResponse, setSynapseResponse] = useState<{ synapse: string; sources: string[] } | null>(null);
   const [showFullSynapse, setShowFullSynapse] = useState(false);
   const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
-  const [askSuggestions, setAskSuggestions] = useState<{question: string}[]>([
-    { question: 'What are the highlights of the spring campaign?' },
-    { question: 'Show me the latest Q1 report.' },
-    { question: 'Who edited the hero product brief?' },
-  ]);
+  const [askSuggestions, setAskSuggestions] = useState<{question: string}[]>([]);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const [inputValue, setInputValue] = useState("");
+  const [recentQueries, setRecentQueries] = useState<{ search: string[], ask: string[] }>({ search: [], ask: [] });
+  const [hasFetchedRecent, setHasFetchedRecent] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
   const connectedApps = [
     {
@@ -92,12 +133,50 @@ const Overview = () => {
     }
   ];
 
+  const router = useRouter();
+  const isSearchPage = router.pathname.includes('/search');
+
+  // Fetch recent queries when input is reset and user starts typing
   useEffect(() => {
-    if (searchQuery.length < 1) {
+    const fetchRecentQueries = async () => {
+      if (!hasFetchedRecent && isTyping) {
+        try {
+          const response = await fetch('/api/recent/recent');
+          const data = await response.json();
+          setRecentQueries(data);
+          setHasFetchedRecent(true);
+        } catch (error) {
+          console.error('Error fetching recent queries:', error);
+        }
+      }
+    };
+
+    fetchRecentQueries();
+  }, [hasFetchedRecent, isTyping]);
+
+  // Reset hasFetchedRecent when input is cleared
+  useEffect(() => {
+    if (inputValue === '') {
+      setHasFetchedRecent(false);
+      setIsTyping(false);
+    }
+  }, [inputValue]);
+
+  // Update input handling
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    setShowDropdown(true);
+    setIsTyping(true);
+  };
+
+  // Update search effect to only trigger on 5+ characters
+  useEffect(() => {
+    if (searchQuery.length < 5) {
       setSearchResults([]);
       setAskResponse(null);
       setSynapseResponse(null);
       setFollowUpQuestions([]);
+      setAskSuggestions([]);
       return;
     }
 
@@ -115,17 +194,13 @@ const Overview = () => {
           
           // Extract follow-up questions from the answer
           try {
-            // Check if data has a structured format with follow_up_questions
             let parsedData = data;
-            // Extract follow-up questions from structured data
             if (parsedData.follow_up_questions) {
               let questions: string[] = [];
               if (typeof parsedData.follow_up_questions === 'string') {
                 try {
-                  // Try to parse as JSON array
                   questions = JSON.parse(parsedData.follow_up_questions);
                 } catch {
-                  // Fallback: split by comma and clean up
                   questions = parsedData.follow_up_questions.split(',').map((q: string) => q.trim().replace(/^"|"$/g, ''));
                 }
               } else if (Array.isArray(parsedData.follow_up_questions)) {
@@ -160,18 +235,13 @@ const Overview = () => {
           // Extract follow-up questions from new structured synapse response
           if (synapseData) {
             try {
-              // Check if synapseData has a synapse property with JSON content
               let parsedData = synapseData;
-  
-              // Extract follow-up questions from structured data
               if (parsedData.follow_up_questions) {
                 let questions: string[] = [];
                 if (typeof parsedData.follow_up_questions === 'string') {
                   try {
-                    // Try to parse as JSON array
                     questions = JSON.parse(parsedData.follow_up_questions);
                   } catch {
-                    // Fallback: split by comma and clean up
                     questions = parsedData.follow_up_questions.split(',').map((q: string) => q.trim().replace(/^"|"$/g, ''));
                   }
                 } else if (Array.isArray(parsedData.follow_up_questions)) {
@@ -184,7 +254,7 @@ const Overview = () => {
                 } else {
                   setFollowUpQuestions([]);
                 }
-              }  else {
+              } else {
                 setFollowUpQuestions([]);
               }
             } catch (e) {
@@ -263,8 +333,10 @@ const Overview = () => {
   // Only show popover if user is typing (1+ chars)
   const shouldShowPopover = showDropdown && searchQuery.length >= 1;
 
-  // Filter recent queries by search text
-  const filteredRecent = RECENT_QUERIES.filter(q => q.toLowerCase().includes(searchQuery.toLowerCase()) && searchQuery.length > 0);
+  // Update the filtered recent queries logic
+  const filteredRecent = activeTab === 'ask' 
+    ? recentQueries.ask.filter(q => q.toLowerCase().includes(searchQuery.toLowerCase()))
+    : recentQueries.search.filter(q => q.toLowerCase().includes(searchQuery.toLowerCase()));
 
   // Function to handle markdown link clicks
   const handleMarkdownLinkClick = (sourceName: string) => {
@@ -408,10 +480,7 @@ const Overview = () => {
               className={`bg-transparent text-lg focus:outline-none placeholder-gray-400 mb-0 w-full pr-20 pl-4 rounded-t-2xl ${shouldShowPopover ? '' : 'rounded-b-2xl'} break-words`}
               placeholder="Search or ask your work content…"
               value={inputValue}
-              onChange={e => {
-                setInputValue(e.target.value);
-                setShowDropdown(true);
-              }}
+              onChange={handleInputChange}
               onFocus={() => setShowDropdown(true)}
               onBlur={() => {
                 setShowDropdown(false);
@@ -438,9 +507,106 @@ const Overview = () => {
               {/* Recent Queries */}
               {filteredRecent.map((query, idx) => (
                 <div
-                  key={query}
+                  key={`${activeTab}-${idx}`}
                   className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                  onMouseDown={() => setSearchQuery(query)}
+                  onMouseDown={async () => {
+                    setInputValue(query);
+                    setSearchQuery(query);
+                    setShowDropdown(false);
+                    setIsLoading(true);
+
+                    try {
+                      if (activeTab === 'ask') {
+                        const res = await fetch(`/api/ask?query=${encodeURIComponent(query)}`);
+                        const data = await res.json();
+                        setAskResponse(data);
+                        
+                        // Extract follow-up questions
+                        try {
+                          let parsedData = data;
+                          if (parsedData.follow_up_questions) {
+                            let questions: string[] = [];
+                            if (typeof parsedData.follow_up_questions === 'string') {
+                              try {
+                                questions = JSON.parse(parsedData.follow_up_questions);
+                              } catch {
+                                questions = parsedData.follow_up_questions.split(',').map((q: string) => q.trim().replace(/^"|"$/g, ''));
+                              }
+                            } else if (Array.isArray(parsedData.follow_up_questions)) {
+                              questions = parsedData.follow_up_questions.map((q: string) => typeof q === 'string' ? q.trim() : q);
+                            }
+                            questions = questions.map(q => q.replace(/^"|"$/g, '').replace(/^\[|\]$/g, '').trim());
+                            if (questions.length > 0) {
+                              setFollowUpQuestions(questions);
+                              setAskSuggestions(questions.map((q: string) => ({ question: q })));
+                            } else {
+                              setFollowUpQuestions([]);
+                            }
+                          } else {
+                            setFollowUpQuestions([]);
+                          }
+                        } catch (e) {
+                          console.error('Error processing ask response:', e);
+                          setFollowUpQuestions([]);
+                        }
+                        
+                        setSearchResults([]);
+                        setSynapseResponse(null);
+                      } else {
+                        // Find mode: call both search and synapse in parallel
+                        setAskResponse(null);
+                        const searchPromise = fetch(`/api/search/search?query=${encodeURIComponent(query)}`).then(res => res.json());
+                        const synapsePromise = fetch(`/api/ask_synapse?query=${encodeURIComponent(query)}`).then(res => res.json()).catch(() => null);
+                        const [searchData, synapseData] = await Promise.all([searchPromise, synapsePromise]);
+                        setSearchResults(Array.isArray(searchData) ? searchData : []);
+                        setSynapseResponse(synapseData);
+                        
+                        // Extract follow-up questions from synapse response
+                        if (synapseData) {
+                          try {
+                            let parsedData = synapseData;
+                            if (parsedData.follow_up_questions) {
+                              let questions: string[] = [];
+                              if (typeof parsedData.follow_up_questions === 'string') {
+                                try {
+                                  questions = JSON.parse(parsedData.follow_up_questions);
+                                } catch {
+                                  questions = parsedData.follow_up_questions.split(',').map((q: string) => q.trim().replace(/^"|"$/g, ''));
+                                }
+                              } else if (Array.isArray(parsedData.follow_up_questions)) {
+                                questions = parsedData.follow_up_questions.map((q: string) => typeof q === 'string' ? q.trim() : q);
+                              }
+                              questions = questions.map(q => q.replace(/^"|"$/g, '').replace(/^\[|\]$/g, '').trim());
+                              if (questions.length > 0) {
+                                setFollowUpQuestions(questions);
+                                setAskSuggestions(questions.map((q: string) => ({ question: q })));
+                              } else {
+                                setFollowUpQuestions([]);
+                              }
+                            } else {
+                              setFollowUpQuestions([]);
+                            }
+                          } catch (e) {
+                            console.error('Error processing synapse response:', e);
+                            setFollowUpQuestions([]);
+                          }
+                        } else {
+                          setFollowUpQuestions([]);
+                        }
+                      }
+                    } catch (e) {
+                      console.error('API error:', e);
+                      if (activeTab === 'ask') {
+                        setAskResponse(null);
+                      } else {
+                        setSearchResults([]);
+                        setSynapseResponse(null);
+                      }
+                      setFollowUpQuestions([]);
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
                 >
                   <Clock className="w-5 h-5 text-gray-400 mr-3" />
                   <div className="text-gray-900 text-sm break-words">{query}</div>
@@ -477,18 +643,65 @@ const Overview = () => {
                   })}
                 </div>
               )}
-              {/* Ask Label (always show) */}
-              <div className="px-4 py-2 text-xs text-gray-400 border-t border-gray-100 bg-gray-50 font-semibold">Ask</div>
-              {/* Ask Suggestions - Show follow-up questions if available, otherwise show default ASK_SUGGESTIONS */}
+              {/* Ask Label (only show if we have suggestions) */}
+              {(followUpQuestions.length > 0 || askSuggestions.length > 0) && (
+                <div className="px-4 py-2 text-xs text-gray-400 border-t border-gray-100 bg-gray-50 font-semibold">Ask</div>
+              )}
+              {/* Ask Suggestions - Show follow-up questions if available */}
               {(followUpQuestions.length > 0 ? followUpQuestions : askSuggestions.map(s => s.question)).map((question, idx) => (
                 <div
                   key={idx}
                   className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                  onMouseDown={() => {
-                    setSearchQuery(question);
+                  onMouseDown={async () => {
                     setInputValue(question);
+                    setSearchQuery(question);
                     setActiveTab('ask');
                     setShowDropdown(false);
+                    setIsLoading(true);
+
+                    try {
+                      const res = await fetch(`/api/ask?query=${encodeURIComponent(question)}`);
+                      const data = await res.json();
+                      setAskResponse(data);
+                      
+                      // Extract follow-up questions
+                      try {
+                        let parsedData = data;
+                        if (parsedData.follow_up_questions) {
+                          let questions: string[] = [];
+                          if (typeof parsedData.follow_up_questions === 'string') {
+                            try {
+                              questions = JSON.parse(parsedData.follow_up_questions);
+                            } catch {
+                              questions = parsedData.follow_up_questions.split(',').map((q: string) => q.trim().replace(/^"|"$/g, ''));
+                            }
+                          } else if (Array.isArray(parsedData.follow_up_questions)) {
+                            questions = parsedData.follow_up_questions.map((q: string) => typeof q === 'string' ? q.trim() : q);
+                          }
+                          questions = questions.map(q => q.replace(/^"|"$/g, '').replace(/^\[|\]$/g, '').trim());
+                          if (questions.length > 0) {
+                            setFollowUpQuestions(questions);
+                            setAskSuggestions(questions.map((q: string) => ({ question: q })));
+                          } else {
+                            setFollowUpQuestions([]);
+                          }
+                        } else {
+                          setFollowUpQuestions([]);
+                        }
+                      } catch (e) {
+                        console.error('Error processing ask response:', e);
+                        setFollowUpQuestions([]);
+                      }
+                      
+                      setSearchResults([]);
+                      setSynapseResponse(null);
+                    } catch (e) {
+                      console.error('API error:', e);
+                      setAskResponse(null);
+                      setFollowUpQuestions([]);
+                    } finally {
+                      setIsLoading(false);
+                    }
                   }}
                 >
                   <HelpCircle className="w-5 h-5 text-blue-400 mr-3" />
@@ -567,25 +780,11 @@ const Overview = () => {
                       hyphens: 'auto',
                       paddingLeft: '8px'
                     }}>
-                      {(() => {
-                        const structuredData = getStructuredData(synapseResponse);
-                        if (structuredData && structuredData.summary) {
-                          return (
-                            <div>
-                              <p className="text-lg font-medium mb-2">{structuredData.summary}</p>
-                              {structuredData.answer_status && (
-                                <p className="text-sm text-gray-500 mb-3">Status: {structuredData.answer_status}</p>
-                              )}
-                            </div>
-                          );
-                        } else {
-                          return (
-                            <ReactMarkdown>
-                              {cleanSourceText((synapseResponse.synapse.split('## Sources')[0] || '').trim())}
-                            </ReactMarkdown>
-                          );
-                        }
-                      })()}
+                      <div className="text-sm text-gray-700">
+                        <ReactMarkdown components={customRenderers}>
+                          {synapseResponse.synapse}
+                        </ReactMarkdown>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -621,6 +820,14 @@ const Overview = () => {
                                   ))}
                                 </tbody>
                               </table>
+                            );
+                          } else if (details.details_type === 'paragraph' && typeof details.content === 'string') {
+                            detailsContent = (
+                              <div className="mt-4 text-sm text-gray-700">
+                                <ReactMarkdown components={customRenderers}>
+                                  {details.content}
+                                </ReactMarkdown>
+                              </div>
                             );
                           } else if (details.details_type === 'text' && typeof details.content === 'string') {
                             detailsContent = <ReactMarkdown components={customRenderers}>{details.content}</ReactMarkdown>;
@@ -891,6 +1098,7 @@ const Overview = () => {
           </div>
         </div>
       </div>
+      <RecentQueries />
     </AdminLayout>
   );
 };

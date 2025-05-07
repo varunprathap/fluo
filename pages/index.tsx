@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 import Link from "next/link";
+import Image from "next/image";
 import { Space_Grotesk } from "next/font/google";
 import {
   Route
@@ -104,10 +105,11 @@ export default function App() {
      <section className="hero py-12">
       <h1 className="fluo-heading">
         Fluo OS{" "}
-        <Route
+        {/* <Route
           size={57}
           className="h-8 w-8 text-[#6C3BFF] sm:h-12 sm:w-12"
-        />
+        /> */}
+  
       </h1>
       <div className="flex flex-col items-center justify-center gap-4 mt-6 text-lg text-center">
         <p>
