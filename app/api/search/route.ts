@@ -12,11 +12,11 @@ class SearchAPIError extends Error {
 }
 
 const validateEnv = () => {
-  if (!process.env.NEXT_PUBLIC_SEARCH_API_URL) {
+  if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
     throw new SearchAPIError(
       'Search API URL not configured',
       500,
-      'NEXT_PUBLIC_SEARCH_API_URL is not set in environment variables'
+      'NEXT_PUBLIC_API_BASE_URL is not set in environment variables'
     );
   }
 };
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const searchUrl = new URL(`${process.env.NEXT_PUBLIC_SEARCH_API_URL}/search`);
+    const searchUrl = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/search`);
     searchUrl.searchParams.append('query', query);
     searchUrl.searchParams.append('limit', limit.toString());
 
