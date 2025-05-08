@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing authorization code' }, { status: 400 });
   }
 
-  if (!process.env.NEXT_PUBLIC_SITE_URL || !process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  if (!process.env.NEXT_PUBLIC_SITE_URL || !process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
   }
 
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
       },
       body: new URLSearchParams({
         code,
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        client_id: process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
         redirect_uri: redirectUri,
         grant_type: "authorization_code",
