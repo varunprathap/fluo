@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { googleAuthConfig } from '@/config/googleAuthConfig';
+import { googleClientId, googleClientSecret } from '@/amplify/auth/secrets';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url!);
@@ -10,7 +11,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing authorization code' }, { status: 400 });
   }
 
-  if (!process.env.NEXT_PUBLIC_SITE_URL || !process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  if (!process.env.NEXT_PUBLIC_SITE_URL || !googleClientId || !googleClientSecret) {
     return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
   }
 
@@ -27,8 +28,8 @@ export async function GET(req: NextRequest) {
       },
       body: new URLSearchParams({
         code,
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        client_id: googleClientId.toString(),
+        client_secret: googleClientSecret.toString(),
         redirect_uri: redirectUri,
         grant_type: "authorization_code",
         access_type: "offline",
