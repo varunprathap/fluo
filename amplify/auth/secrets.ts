@@ -1,4 +1,4 @@
-import { defineSecret } from '@aws-amplify/backend';
+import { secret } from '@aws-amplify/backend';
 
-export const googleClientId = defineSecret('GOOGLE_CLIENT_ID');
-export const googleClientSecret = defineSecret('GOOGLE_CLIENT_SECRET'); 
+export const googleClientId = secret('GOOGLE_CLIENT_ID');
+export const googleClientSecret = secret('GOOGLE_CLIENT_SECRET'); 
