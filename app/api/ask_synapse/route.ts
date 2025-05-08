@@ -15,10 +15,12 @@ export async function GET(req: NextRequest) {
   if (limit) params.append('limit', String(limit));
   if (similarity_threshold) params.append('similarity_threshold', String(similarity_threshold));
 
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   try {
     // Call the external ask_synapse API
     const response = await fetch(
-      `http://localhost:8000/ask_synapse?${params.toString()}`,
+      `${baseUrl}/ask_synapse?${params.toString()}`,
       {
         headers: {
           'accept': 'application/json'

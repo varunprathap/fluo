@@ -9,9 +9,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
     // Call the external ask API
     const response = await fetch(
-      `http://localhost:8000/ask?query=${encodeURIComponent(query)}&limit=10&similarity_threshold=0.8`,
+      `${baseUrl}/ask?query=${encodeURIComponent(query)}&limit=10&similarity_threshold=0.8`,
       {
         headers: {
           'accept': 'application/json'
