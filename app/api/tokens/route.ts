@@ -2,11 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DynamoDB } from 'aws-sdk';
 
 const dynamoDb = new DynamoDB.DocumentClient({
-  region: process.env.NEXT_PUBLIC_AWS_REGION || 'ap-southeast-2',
-  credentials: {
-    accessKeyId: process.env.ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.SECRET_ACCESS_KEY || ''
-  }
+  region: process.env.NEXT_PUBLIC_AWS_REGION || 'ap-southeast-2'
+
 });
 
 interface TokenData {
