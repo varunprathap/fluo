@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DynamoDB } from 'aws-sdk';
-import { accessKeyId, secretAccessKey } from '@/amplify/auth/secrets';
 
 const dynamoDb = new DynamoDB.DocumentClient({
   region: process.env.NEXT_PUBLIC_AWS_REGION || 'ap-southeast-2',
-  accessKeyId: accessKeyId.toString(),
-  secretAccessKey: secretAccessKey.toString()
+  credentials: {
+    accessKeyId: process.env.ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.SECRET_ACCESS_KEY || ''
+  }
 });
 
 interface TokenData {
@@ -75,7 +76,6 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  const requestId = Math.random().toString(36).substring(7);
   try {
     if (!process.env.TOKENS_TABLE_NAME) {
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
@@ -94,6 +94,7 @@ export async function GET() {
     )[0];
     return NextResponse.json(mostRecentToken);
   } catch (error: any) {
+    console.error('DynamoDB Error:', error);
     return NextResponse.json({ error: 'Failed to retrieve token', details: error.message }, { status: 500 });
   }
 }

@@ -1,72 +1,74 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { googleAuthConfig } from '@/config/googleAuthConfig';
-import { googleClientId, googleClientSecret } from '@/amplify/auth/secrets';
+import { NextResponse } from 'next/server';
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url!);
-  const code = searchParams.get('code');
-  const state = searchParams.get('state');
+const secretName = 'fluo_google';
+const region = 'ap-southeast-2';
 
-  if (!code || typeof code !== 'string') {
-    return NextResponse.json({ error: 'Missing authorization code' }, { status: 400 });
-  }
-
-  if (!process.env.NEXT_PUBLIC_SITE_URL || !googleClientId || !googleClientSecret) {
-    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
-  }
+export async function GET(request: Request) {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const redirectUrl = `${baseUrl}/admin/dash/apps`;
 
   try {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
-    const redirectUri = `${siteUrl}${googleAuthConfig.redirectUri}`;
+    const { searchParams } = new URL(request.url);
+    const code = searchParams.get('code');
 
-    // Exchange code for tokens
-    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Accept": "application/json"
+    if (!code) {
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // Fetch Google secrets from AWS Secrets Manager
+    const client = new SecretsManagerClient({ region });
+    const command = new GetSecretValueCommand({ SecretId: secretName });
+    const data = await client.send(command);
+
+    if (!data.SecretString) {
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    const config = JSON.parse(data.SecretString);
+
+    // Get redirect_uri from environment variable
+    const redirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI;
+    if (!redirectUri) {
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // Exchange the code for tokens using server-side secrets
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
         code,
-        client_id: googleClientId.toString(),
-        client_secret: googleClientSecret.toString(),
+        client_id: config.client_id,
+        client_secret: config.client_secret,
         redirect_uri: redirectUri,
-        grant_type: "authorization_code",
-        access_type: "offline",
-      }).toString()
+        grant_type: 'authorization_code',
+      }),
     });
 
-    const tokenData = await tokenRes.json();
-    if (tokenData.error) {
-      return NextResponse.json({ 
-        error: tokenData.error_description || 'Failed to exchange code for tokens',
-        details: tokenData.error
-      }, { status: 500 });
+    if (!tokenResponse.ok) {
+      return NextResponse.redirect(redirectUrl);
     }
 
-    const { access_token, refresh_token, expires_in } = tokenData;
+    const tokens = await tokenResponse.json();
 
-    // Store tokens in DynamoDB
-    const storeRes = await fetch(`${siteUrl}/api/tokens`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+    // Save tokens to DynamoDB via /api/tokens POST
+    await fetch(`${baseUrl}/api/tokens`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        access_token,
-        refresh_token,
-        expires_in,
-        scope: searchParams.get('scope')
-      })
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expires_in: tokens.expires_in,
+      }),
     });
 
-    if (!storeRes.ok) {
-      return NextResponse.json({ error: 'Failed to store tokens' }, { status: 500 });
-    }
-
-    // Redirect back to the apps page with success parameter
-    return NextResponse.redirect(`${siteUrl}/admin/dash/apps?auth_status=success`);
-  } catch (error: any) {
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}/admin/dash/apps?auth_status=error&message=${encodeURIComponent(error.message || 'Unknown error')}`);
+    // Always redirect to the dashboard page
+    return NextResponse.redirect(redirectUrl);
+  } catch (error) {
+    console.error('Error in Google callback:', error);
+    return NextResponse.redirect(redirectUrl);
   }
 } 

@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     const userInfo = await userInfoRes.json();
 
     // Update the token in DynamoDB
-    const storeRes = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/tokens`, {
+    const storeRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/tokens`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

@@ -12,6 +12,30 @@ const GoogleAuthPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [userInfo, setUserInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [googleConfig, setGoogleConfig] = useState<any>(null);
+
+  // Fetch Google auth configuration
+  useEffect(() => {
+    const fetchGoogleConfig = async () => {
+      try {
+        const response = await fetch('/api/auth/config');
+        if (response.ok) {
+          const config = await response.json();
+          setGoogleConfig({
+            ...googleAuthConfig,
+            ...config
+          });
+        } else {
+          setError('Failed to load Google configuration');
+        }
+      } catch (error) {
+        console.error('Error fetching Google config:', error);
+        setError('Failed to load Google configuration');
+      }
+    };
+
+    fetchGoogleConfig();
+  }, []);
 
   // Check token status in DynamoDB
   const checkTokenStatus = useCallback(async () => {
@@ -160,29 +184,34 @@ const GoogleAuthPage = () => {
   }, [checkTokenStatus]);
 
   const handleConnect = useCallback(() => {
+    if (!googleConfig) {
+      setError('Google configuration not loaded');
+      return;
+    }
+
     console.log("[Google OAuth] Starting authentication flow");
     console.log("[Google OAuth] Config:", {
-      clientId: googleAuthConfig.clientId ? 'present' : 'missing',
-      redirectUri: googleAuthConfig.redirectUri,
-      scope: googleAuthConfig.scope
+      clientId: googleConfig.clientId ? 'present' : 'missing',
+      redirectUri: googleConfig.redirectUri,
+      scope: googleConfig.scope
     });
     
     setError(null);
     setIsConnecting(true);
 
     const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-    authUrl.searchParams.append("client_id", googleAuthConfig.clientId);
-    authUrl.searchParams.append("redirect_uri", `${window.location.origin}${googleAuthConfig.redirectUri}`);
-    authUrl.searchParams.append("response_type", googleAuthConfig.responseType);
-    authUrl.searchParams.append("scope", googleAuthConfig.scope);
-    authUrl.searchParams.append("access_type", googleAuthConfig.access_type);
-    authUrl.searchParams.append("include_granted_scopes", String(googleAuthConfig.include_granted_scopes));
-    authUrl.searchParams.append("state", googleAuthConfig.state);
-    authUrl.searchParams.append("prompt", googleAuthConfig.prompt);
+    authUrl.searchParams.append("client_id", googleConfig.clientId);
+    authUrl.searchParams.append("redirect_uri", `${window.location.origin}${googleConfig.redirectUri}`);
+    authUrl.searchParams.append("response_type", googleConfig.responseType);
+    authUrl.searchParams.append("scope", googleConfig.scope);
+    authUrl.searchParams.append("access_type", googleConfig.access_type);
+    authUrl.searchParams.append("include_granted_scopes", String(googleConfig.include_granted_scopes));
+    authUrl.searchParams.append("state", googleConfig.state);
+    authUrl.searchParams.append("prompt", googleConfig.prompt);
 
     console.log("[Google OAuth] Redirecting to:", authUrl.toString());
     window.location.href = authUrl.toString();
-  }, []);
+  }, [googleConfig]);
 
   const handleDisconnect = useCallback(async () => {
     console.log("[Disconnect] Removing Google auth token");
@@ -256,14 +285,6 @@ const GoogleAuthPage = () => {
             )}
           </div>
         </div>
-
-        {!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
-          <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-md text-sm mb-6">
-            <p>
-              <strong>Warning:</strong> Google Client ID is not configured.
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );
