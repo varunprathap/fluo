@@ -21,6 +21,7 @@ interface TokenData {
 }
 
 const userId = 'varun@vibing.com.au'; // TODO: Replace with real user logic
+const TABLE_NAME = 'fluo';
 
 export async function POST(req: NextRequest) {
   const requestId = Math.random().toString(36).substring(7);
@@ -30,16 +31,13 @@ export async function POST(req: NextRequest) {
     if (!access_token) {
       return NextResponse.json({ error: 'Access token is required' }, { status: 400 });
     }
-    if (!process.env.TOKENS_TABLE_NAME) {
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
-    }
     const expiresAt = expires_in 
       ? new Date(Date.now() + expires_in * 1000).toISOString()
       : undefined;
     try {
       // Delete existing tokens
       const existingToken = await dynamoDb.query({
-        TableName: process.env.TOKENS_TABLE_NAME,
+        TableName: TABLE_NAME,
         IndexName: 'userId',
         KeyConditionExpression: 'userId = :userId',
         ExpressionAttributeValues: { ':userId': userId }
@@ -47,7 +45,7 @@ export async function POST(req: NextRequest) {
       if (existingToken.Items && existingToken.Items.length > 0) {
         const tokenToDelete = existingToken.Items[0];
         await dynamoDb.delete({
-          TableName: process.env.TOKENS_TABLE_NAME,
+          TableName: TABLE_NAME,
           Key: { id: tokenToDelete.id }
         }).promise();
       }
@@ -63,7 +61,7 @@ export async function POST(req: NextRequest) {
         provider: 'google'
       };
       await dynamoDb.put({
-        TableName: process.env.TOKENS_TABLE_NAME,
+        TableName: TABLE_NAME,
         Item: tokenData
       }).promise();
       return NextResponse.json({ success: true });
@@ -77,11 +75,8 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    if (!process.env.TOKENS_TABLE_NAME) {
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
-    }
     const result = await dynamoDb.query({
-      TableName: process.env.TOKENS_TABLE_NAME,
+      TableName: TABLE_NAME,
       IndexName: 'userId',
       KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: { ':userId': userId }
@@ -102,11 +97,8 @@ export async function GET() {
 export async function DELETE() {
   const requestId = Math.random().toString(36).substring(7);
   try {
-    if (!process.env.TOKENS_TABLE_NAME) {
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
-    }
     const queryResult = await dynamoDb.query({
-      TableName: process.env.TOKENS_TABLE_NAME,
+      TableName: TABLE_NAME,
       IndexName: 'userId',
       KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: { ':userId': userId }
@@ -118,7 +110,7 @@ export async function DELETE() {
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )[0];
     await dynamoDb.delete({
-      TableName: process.env.TOKENS_TABLE_NAME,
+      TableName: TABLE_NAME,
       Key: { id: tokenToDelete.id }
     }).promise();
     return NextResponse.json({ success: true });
