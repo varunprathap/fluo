@@ -6,8 +6,6 @@ import type { Schema } from "@/amplify/data/resource";
 import Link from "next/link";
 import { Space_Grotesk } from "next/font/google";
 import { Route, Menu, X } from "lucide-react";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"] });
 const client = generateClient<Schema>();
@@ -215,11 +213,10 @@ export default function Home() {
   }, [words.length]);
 
   return (
-    <div className={`${spaceGrotesk.className} text-gray-900 relative h-screen overflow-hidden`}>
-      <Header />
+    <div className={`${spaceGrotesk.className} text-gray-900 relative flex-1 flex flex-col justify-center items-center overflow-hidden`}>
       <ParticleAnimation />
       
-      <main className="relative z-10 h-full flex flex-col justify-center items-center px-[5px] md:px-0">
+      <main className="relative z-10 flex flex-col items-center px-[5px] md:px-0">
         <section className="hero mb-8 px-8 md:px-0">
           <div className="flex flex-col items-center justify-center gap-4 text-lg text-center">
             <div className="bg-white/70 backdrop-blur-sm rounded-lg px-6 py-4 shadow-lg border border-white/30 mx-4 md:mx-0">
@@ -276,8 +273,6 @@ export default function Home() {
           </div>
         </section>
       </main>
-      
-      <Footer variant="fixed" />
     </div>
   );
 }
