@@ -11,4 +11,19 @@
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-end-rgb));
-} 
+}
+
+/* Airport-style ticker animation */
+.fluo-ticker {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.fluo-ticker span {
+  display: block;
+  white-space: nowrap;
+  transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1), 
+              opacity 1s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
